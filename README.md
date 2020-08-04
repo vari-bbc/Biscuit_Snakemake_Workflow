@@ -4,8 +4,7 @@ This workflow takes raw, paired-end whole-genome bisultite sequencing (WGBS) dat
 The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data: https://huishenlab.github.io/biscuit/.
 
 ## Running the workflow
-+ Clone the repo to HPC
-		git clone https://github.com/vari-bbc/WGBS_Biscuit_Snakemake
++ Clone the repo `git clone https://github.com/vari-bbc/WGBS_Biscuit_Snakemake`
 + Load your gzipped reads into `raw_data/`
 + Setup a sample sheet in `src/samples.tsv` containing:
 	+ a row for each sample
