@@ -28,7 +28,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 + proceed to differential methylation analysis with e.g. `dmrseq`
 
 ## Diagram of workflow
-![workflow diagram](src/DAG.png)
+![workflow diagram](bin/DAG.png)
 
 ## Helpful snakemake commands for debugging a workflow
 
