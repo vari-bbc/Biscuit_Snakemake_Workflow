@@ -6,9 +6,9 @@ from snakemake.utils import validate, min_version
 ##### set minimum snakemake version #####
 min_version("5.14.0")
 
-samples = pd.read_table("src/samples.tsv", dtype=str).set_index(["sample"], drop=False)
+samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 
-configfile: "src/config.yaml"
+configfile: "bin/config.yaml"
 #validate(config, schema="schemas/config.schema.yaml")
 
 #validate(samples, schema="schemas/samples.schema.yaml")
@@ -80,7 +80,7 @@ rule rename_fastq:
         config["envmodules"]["R"],
         config["envmodules"]["snakemake"],
     script:
-        "src/rename.R"
+        "bin/rename.R"
 
 rule trim_galore:
     input:

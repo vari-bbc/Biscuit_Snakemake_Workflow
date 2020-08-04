@@ -1,0 +1,6 @@
+sample	group	fq1	fq2
+sample_1	D0	sample_1_R1.fastq.gz	sample_1_R2.fastq.gz
+sample_2	D0	sample_2_R1.fastq.gz	sample_2_R2.fastq.gz
+sample_3	D0	sample_3_R1.fastq.gz	sample_3_R2.fastq.gz
+sample_4	D0	sample_4_R1.fastq.gz	sample_4_R2.fastq.gz
+sample_5	D0	sample_5_R1.fastq.gz	sample_5_R2.fastq.gz
