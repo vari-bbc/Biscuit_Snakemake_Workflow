@@ -16,7 +16,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 	+ reference, 
 	+ biscuit index
 	+ biscuit QC assets
-	+ env modules 
+	+ environment modules (If you do not have these modules, the executables for the required programs are in the path. It will give a warning but run)
 	+ a few other parameters (it is also possible to modify the Snakemake file if you want to change what is being called)
 + Submit the workflow to an HPC using something similar to src/run_snake.sh (will need to be changed)
 		e.g. qsub -q [queue_name] src/run_snake.sh
@@ -31,8 +31,6 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 ![workflow diagram](src/DAG.png)
 
 ## Helpful snakemake commands for debugging a workflow
-
-This workflow currently depends on modules. If you do not have these modules, it can still run (with a warning) if the executables for the modules are in the path (all modules can be configered in config.yaml)
 
 snakemake -np # test run
 
