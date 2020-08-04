@@ -5,7 +5,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 
 ## Running the workflow
 + Clone the repo to HPC
-		git clone https://github.com/vari-bbc/WGBS_workflow
+		git clone https://github.com/vari-bbc/WGBS_Biscuit_Snakemake
 + Load your gzipped reads into `raw_data/`
 + Setup a sample sheet in `src/samples.tsv` containing:
 	+ a row for each sample
@@ -28,7 +28,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 
 ## Helpful snakemake commands for debugging a workflow
 
-This workflow currently depends on modules. If you do not have these modules, it will still run with a warning, but you need to have the executables for the dependencies in the path (all modules can be configered in config.yaml)
+This workflow currently depends on modules. If you do not have these modules, it can still run (with a warning) if the executables for the modules are in the path (all modules can be configered in config.yaml)
 
 snakemake -np # test run
 
