@@ -12,7 +12,12 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 		1. `sample`
 		2. `fq1` (name of R1 file for sample in `raw_data/`)
 		3. `fq2` (name of R2 file for sample in `raw_data/`)
-+ Modify the config.yaml to specify the appropriate reference, biscuit index, biscuit QC assets, env modules & other parameters as needed
++ Modify the config.yaml to specify the appropriate 
+	+ reference, 
+	+ biscuit index
+	+ biscuit QC assets
+	+ env modules 
+	+ a few other parameters (it is also possible to modify the Snakemake file if you want to change what is being called)
 + Submit the workflow to an HPC using something similar to src/run_snake.sh (will need to be changed)
 		e.g. qsub -q [queue_name] src/run_snake.sh
 
