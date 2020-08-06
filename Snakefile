@@ -4,7 +4,7 @@ import os
 import re
 from snakemake.utils import validate, min_version
 ##### set minimum snakemake version #####
-min_version("5.14.0")
+min_version("5.20.1")
 
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 
