@@ -1,6 +1,6 @@
 ref:
-  index: /secondary/projects/laird/projects/2020_04_17_MouseIntestine_WGBS/modified_reference/mm10_ucsc_VillacIGY.fa # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa
-  fasta: /secondary/projects/laird/projects/2020_04_17_MouseIntestine_WGBS/modified_reference/mm10_ucsc_VillacIGY.fa 
+  index: /primary/projects/bbc/references/mouse/indexes/mm10/biscuit/mm10_refchrs # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa
+  fasta: /primary/projects/bbc/references/mouse/indexes/mm10/biscuit/mm10_refchrs.fa
   assets: /primary/projects/bbc/references/mouse/indexes/mm10/biscuit/mm10_QC_assets/
 
 trim_galore:
@@ -8,8 +8,7 @@ trim_galore:
 
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
-   QC: /secondary/projects/bbc/research/WGBS_workflow/make_file.sh
-
+   
 sam_header: #
    PL: il
    PU: nova
@@ -20,7 +19,7 @@ envmodules: # e.g. module load bbc/samtools/samtools-1.9
    R: bbc/R/R-3.6.0
    snakemake: bbc/snakemake/snakemake-5.14.0
    trim_galore: bbc/trim_galore/trim_galore-0.6.0
-   biscuit: bbc/biscuit/biscuit_0_3_14 # make sure that this also adds biscuit's QC.sh to the path!
+   biscuit: bbc/biscuit/biscuit_0_3_16 # make sure that this also adds biscuit's QC.sh to the path!
    samblaster: bbc/samblaster/samblaster-0.1.24
    htslib: bbc/htslib/htslib-1.10.2
    bedtools: bbc/bedtools/bedtools-2.29.2
