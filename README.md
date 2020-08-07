@@ -40,12 +40,4 @@ snakemake -np # test run
 
 `snakemake --use-envmodules --cores 1` # if running on the command line, need use-envmodules option
 
-To test the workflow download (in the workflow dir) the hct116 WGBS data (you will need fastq-dump & seqtk): 
 
-`fastq-dump -A SRR1536575 --split-files --gzip`. 
-
-Then split it into 5 samples:
-for i in {1..5}; do
-   seqtk sample -s${i} SRR1536575_1.fastq.gz 1000 > raw_data/sample_${i}_R1.fq
-   seqtk sample -s${i} SRR1536575_2.fastq.gz 1000 > raw_data/sample_${i}_R2.fq
-done
