@@ -3,6 +3,11 @@ import numpy as np
 import os
 import re
 from snakemake.utils import validate, min_version
+<<<<<<< HEAD
+=======
+##### set minimum snakemake version #####
+min_version("5.20.1")
+>>>>>>> 2d0b98d1bb89498b4ec650426df5b74782b36a00
 
 min_version("5.20.1") # Snakemake
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
