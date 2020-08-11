@@ -3,16 +3,10 @@ import numpy as np
 import os
 import re
 from snakemake.utils import validate, min_version
-##### set minimum snakemake version #####
-min_version("5.14.0")
 
+min_version("5.20.1") # Snakemake
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
-
 configfile: "bin/config.yaml"
-#validate(config, schema="schemas/config.schema.yaml")
-
-#validate(samples, schema="schemas/samples.schema.yaml")
-##### target rules #####
 
 rule all:
     input:
@@ -101,7 +95,8 @@ rule trim_galore:
     benchmark:
         "benchmarks/trim_reads/{sample}.txt"
     params:
-        outdir="analysis/trim_reads/"
+        outdir = "analysis/trim_reads/",
+        quality = config["trim_galore"]["q"],
     envmodules:
         config["envmodules"]["trim_galore"],
         config["envmodules"]["fastqc"],
@@ -115,7 +110,7 @@ rule trim_galore:
         {input} \
         --output_dir {params.outdir} \
         --cores {threads} \
-        -q config["trim_galore"]["q"] \
+        -q {params.quality} \
         --fastqc \
         2> {log.stderr} 1> {log.stdout}
         """
@@ -144,20 +139,20 @@ rule biscuit_align:
         split = "analysis/align/{sample}.split.sam",
         unmapped = "analysis/align/{sample}.unmapped.fastq",
     log:
-        biscuit = "logs/biscuit/biscuit.{sample}.log",
-        samblaster = "logs/biscuit/biscuit_samblaster.{sample}.log",
-        samtools_view = "logs/biscuit/biscuit_view.{sample}.log",
-        samtools_sort = "logs/biscuit/biscuit_sort.{sample}.log",
-        samtools_index = "logs/biscuit/biscuit_index.{sample}.log",
-        samtools_flagstat = "logs/biscuit/biscuit_flagstat.{sample}.log",
+        biscuit = "logs/biscuit/biscuit_align.{sample}.log",
+        samblaster = "logs/biscuit/samblaster.{sample}.log",
+        samtools_view = "logs/biscuit/samtools_view.{sample}.log",
+        samtools_sort = "logs/biscuit/samtools_sort.{sample}.log",
+        samtools_index = "logs/biscuit/samtools_index.{sample}.log",
+        samtools_flagstat = "logs/biscuit/samtools_flagstat.{sample}.log",
         sort_disc =  "logs/biscuit/sort_disc.{sample}.log",
         index_disc = "logs/biscuit/index_disc.{sample}.log",    
         sort_split = "logs/biscuit/sort_split.{sample}.log",
         index_split = "logs/biscuit/index_split.{sample}.log",
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
-    threads: 8 # I do not recommend to exceed 8 threads!
+    threads: 32
     resources:
-        mem_gb=100
+        mem_gb=500
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
@@ -303,7 +298,6 @@ rule biscuit_qc:
         """
         set +o pipefail;
         QC.sh \
-        -t {threads} \
         -o analysis/BISCUITqc \
         --vcf {input.vcf} \
         {params.assets} \
