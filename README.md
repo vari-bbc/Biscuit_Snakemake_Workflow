@@ -22,9 +22,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 		e.g. qsub -q [queue_name] src/run_snake.sh
 
 ## After the workflow
-+ the following output files may be imported into a `BSseq` object using `bicuiteer::readBiscuit()`.
-		analysis/pileup/combined.vcf.gz
-		analysis/pileup/combined.bed.gz
++ the output files in analysis/pileup/ may be imported into a `BSseq` object using `bicuiteer::readBiscuit()`.
 + proceed to differential methylation analysis with e.g. `dmrseq`
 
 ## Diagram of workflow
