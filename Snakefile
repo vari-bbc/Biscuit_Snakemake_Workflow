@@ -25,15 +25,9 @@ rule all:
         # expand("analysis/pileup/{samples.sample}.vcf.gz", samples=samples.itertuples()),
         # expand("analysis/pileup/{samples.sample}.bed.gz", samples=samples.itertuples()),
         # expand("analysis/pileup/{samples.sample}.bed.gz.tbi", samples=samples.itertuples()),
-        # biscuit_pileup_combined
-        # "analysis/pileup/combined.vcf.gz",
-        # "analysis/pileup/combined.vcf.gz.tbi",
-        # "analysis/pileup/combined.vcf_meth_average.tsv",
-        # "analysis/pileup/combined.bed.gz",
-        # "analysis/pileup/combined.bed.gz.tbi",
         # mergecg
-        # expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
-        # expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
+        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
+        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
         # mergecg_combined
         # "analysis/pileup/combined_mergecg.bed.gz",
         # "analysis/pileup/combined_mergecg.bed.gz.tbi",
@@ -102,6 +96,7 @@ rule trim_galore:
     envmodules:
         config["envmodules"]["trim_galore"],
         config["envmodules"]["fastqc"],
+        config["envmodules"]["pigz"],
     threads: 4
     resources:
         mem_gb=80

@@ -25,3 +25,4 @@ envmodules: # e.g. module load bbc/samtools/samtools-1.9
    fastqc: bbc/fastqc/fastqc-0.11.9
    multiqc: bbc/multiqc/multiqc-1.8
    parallel: bbc/parallel/parallel-20191122
+   pigz: bbc/pigz/pigz-2.4
