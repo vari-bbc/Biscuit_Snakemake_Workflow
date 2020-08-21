@@ -120,7 +120,9 @@ rule biscuit_align:
         bam = "analysis/align/{sample}.sorted.markdup.bam",
         bai = "analysis/align/{sample}.sorted.markdup.bam.bai",
         disc = "analysis/align/{sample}.disc.sorted.bam",
+        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai",
         split = "analysis/align/{sample}.split.sorted.bam",
+        split_bai = "analysis/align/{sample}.split.sorted.bam.bai",
         unmapped = "analysis/align/{sample}.unmapped.fastq.gz",
         flagstat = "analysis/align/{sample}.sorted.markdup.bam.flagstat",
     params:
@@ -157,12 +159,13 @@ rule biscuit_align:
         config["envmodules"]["samtools"],
         config["envmodules"]["samblaster"],
         config["envmodules"]["bedtools"],
+        config["envmodules"]["htslib"],
     shell:
         """
         biscuit align -M -t {threads} -b {params.lib_type} \
         -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
         {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
-        samblaster -M --excludeDups --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+        samblaster -M -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
         samtools view -hbu -F 4 -q 20 2> {log.samtools_view} |
         samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
         samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
