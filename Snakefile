@@ -120,7 +120,9 @@ rule biscuit_align:
         bam = "analysis/align/{sample}.sorted.markdup.bam",
         bai = "analysis/align/{sample}.sorted.markdup.bam.bai",
         disc = "analysis/align/{sample}.disc.sorted.bam",
+        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai",
         split = "analysis/align/{sample}.split.sorted.bam",
+        split_bai = "analysis/align/{sample}.split.sorted.bam.bai",
         unmapped = "analysis/align/{sample}.unmapped.fastq.gz",
         flagstat = "analysis/align/{sample}.sorted.markdup.bam.flagstat",
     params:
