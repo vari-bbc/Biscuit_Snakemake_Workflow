@@ -157,6 +157,7 @@ rule biscuit_align:
         config["envmodules"]["samtools"],
         config["envmodules"]["samblaster"],
         config["envmodules"]["bedtools"],
+        config["envmodules"]["htslib"],
     shell:
         """
         biscuit align -M -t {threads} -b {params.lib_type} \
