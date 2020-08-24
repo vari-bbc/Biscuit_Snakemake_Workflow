@@ -1,6 +1,6 @@
 # WGBS workflow
 
-This workflow takes raw, paired-end whole-genome bisultite sequencing (WGBS) data and extracts methylation information and does bisulfite-specific QC.
+This workflow takes raw, paired-end whole-genome bisulfite sequencing (WGBS) data and extracts methylation information and does bisulfite-specific QC.
 The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data: https://huishenlab.github.io/biscuit/. Download biscuit here: https://github.com/huishenlab/biscuit/releases/latest.
 
 ## Running the workflow
