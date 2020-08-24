@@ -23,6 +23,6 @@ envmodules: # e.g. module load bbc/samtools/samtools-1.9
    htslib: bbc/htslib/htslib-1.10.2
    bedtools: bbc/bedtools/bedtools-2.29.2
    fastqc: bbc/fastqc/fastqc-0.11.9
-   multiqc: bbc/multiqc/multiqc-1.8
+   multiqc: bbc/multiqc/multiqc-1.9
    parallel: bbc/parallel/parallel-20191122
    pigz: bbc/pigz/pigz-2.4
