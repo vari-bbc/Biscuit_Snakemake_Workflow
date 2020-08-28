@@ -98,7 +98,7 @@ foreach my $chr (sort keys %chr){
 	#	This is a sliding window approach with -window bp
 	#
 	print STDOUT "Getting window averages for $chr.\n";
-	my $m = max(keys $data{$chr});
+	#my $m = max(keys $data{$chr});
 	#~ #print "$chr\t$m\n";
 	#~ for(my $i=0;$i<=$m;$i+=$windowSize){
 		#~ # foreach of the samples, get the average within the window
@@ -118,7 +118,7 @@ foreach my $chr (sort keys %chr){
 	# this is an approach for a -window size of # CpGs (e.g. 5 CpG windows)
 	my $nCpG=0;
 	my $windowN=0;
-	foreach my $pos (sort {$a<=>$b} keys $data{$chr}){
+	foreach my $pos (sort {$a<=>$b} keys %{$data{$chr}}){
 		$nCpG++;
 		# foreach of the samples, get the average within the window
 		foreach my $sample (keys %{$data{$chr}{$pos}}){
