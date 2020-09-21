@@ -9,6 +9,8 @@ min_version("5.20.1")
 
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
+# include rules from shared directory
+include: "/secondary/projects/bbc/research/shared_snakemake/rules/fastq_qc/fastq_lengths"
 
 rule all:
     input:
@@ -55,7 +57,8 @@ rule all:
         # expand("analysis/BISCUITqc/{samples.sample}_totalReadConversionRate.txt", samples=samples.itertuples()),
         # multiQC
         "analysis/multiqc/multiqc_report.html",
-        # biscuiteer
+        # rule for checking that data is not trimmed
+        expand("analysis/fastq_lengths/{sample}_L000_{read}_001.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
 
 rule rename_fastq:
     output:
@@ -151,7 +154,7 @@ rule biscuit_align:
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
     threads: 32
     resources:
-        mem_gb=320
+        mem_gb=500
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
