@@ -10,7 +10,7 @@ min_version("5.20.1")
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
 # include rules from shared directory
-include: "/secondary/projects/bbc/research/shared_snakemake/rules/fastq_qc/fastq_lengths"
+# include: "/secondary/projects/bbc/research/shared_snakemake/rules/fastq_qc/fastq_lengths"
 
 rule all:
     input:
@@ -58,7 +58,7 @@ rule all:
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
-        expand("analysis/fastq_lengths/{sample}-{read}.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
+        # expand("analysis/fastq_lengths/{sample}-{read}.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
 
 rule rename_fastq:
     output:
