@@ -58,7 +58,7 @@ rule all:
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
-        expand("analysis/fastq_lengths/{sample}_L000_{read}_001.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
+        expand("analysis/fastq_lengths/{sample}-{read}.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
 
 rule rename_fastq:
     output:
