@@ -15,7 +15,7 @@ The workflow centers around Biscuit, a tool for mapping and analyzing WGBS data:
 + Modify the config.yaml to specify the appropriate 
 	+ reference, 
 	+ biscuit index
-	+ biscuit QC assets
+	+ biscuit QC assets (https://github.com/huishenlab/biscuit/releases/tag/v0.3.16.20200420)
 	+ environment modules (If you do not have these modules, the executables for the required programs are in the path. It will give a warning but run)
 	+ a few other parameters (it is also possible to modify the Snakemake file if you want to change what is being called)
 + Submit the workflow to an HPC using something similar to bin/run_snake.sh (this file will need to be modified). It is important to submit the job from the directory where the Snakefile is!
