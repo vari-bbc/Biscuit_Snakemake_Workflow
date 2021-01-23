@@ -7,7 +7,7 @@
 
 cd ${PBS_O_WORKDIR}
 
-module load bbc/snakemake/snakemake-5.28.1
+module load bbc/snakemake/snakemake-5.28.0
 
 # save DAG job file with time stamp
 TIME=$(date "+%Y-%m-%d_%H.%M.%S")
