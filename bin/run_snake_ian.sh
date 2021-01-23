@@ -7,7 +7,7 @@
 
 cd ${PBS_O_WORKDIR}
 
-module load bbc/snakemake/snakemake-5.20.1
+module load bbc/snakemake/snakemake-5.28.1
 
 # save DAG job file with time stamp
 TIME=$(date "+%Y-%m-%d_%H.%M.%S")
@@ -18,7 +18,7 @@ snakemake \
 --use-envmodules \
 --jobs 20 \
 --cluster "qsub \
--q bbc \
+-q laird \
 -V \
 -l nodes=1:ppn={threads} \
 -l mem={resources.mem_gb}gb \
