@@ -154,7 +154,7 @@ rule biscuit_align:
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
     threads: 32
     resources:
-        mem_gb=500
+        mem_gb=350
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
