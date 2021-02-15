@@ -26,3 +26,8 @@ envmodules: # e.g. module load bbc/samtools/samtools-1.9
    multiqc: bbc/multiqc/multiqc-1.9
    parallel: bbc/parallel/parallel-20191122
    pigz: bbc/pigz/pigz-2.4
+
+hpcParameters:
+   maxThreads: 32
+   maxMemoryGb: 350
+   trimThreads: 8

@@ -100,7 +100,7 @@ rule trim_galore:
         config["envmodules"]["trim_galore"],
         config["envmodules"]["fastqc"],
         config["envmodules"]["pigz"],
-    threads: 4
+    threads: config["hpcParameters"]["trimThreads"]
     resources:
         mem_gb=80
     shell:
@@ -152,9 +152,9 @@ rule biscuit_align:
         sort_split = "logs/biscuit/sort_split.{sample}.log",
         index_split = "logs/biscuit/index_split.{sample}.log",
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
-    threads: 32
+    threads: config["hpcParameters"]["maxThreads"]
     resources:
-        mem_gb=350
+        mem_gb = config["hpcParameters"]["maxMemoryGb"]
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
