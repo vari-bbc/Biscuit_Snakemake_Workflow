@@ -59,6 +59,9 @@ rule all:
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
         # expand("analysis/fastq_lengths/{sample}-{read}.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
+        # rule for quality control vectors
+        expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
 
 rule rename_fastq:
     output:
@@ -351,3 +354,40 @@ rule multiQC:
         -o analysis/multiqc \
         -n multiqc_report.html 2> {log}
         """
+
+if config["control_vectors"]:
+	rule control_vectors:
+		input:
+		   bed="analysis/pileup/{sample}_mergecg.bed.gz",
+		envmodules:
+		   config["envmodules"]["samtools"],
+		   config["envmodules"]["htslib"],
+		output:
+		   lambda_bed = "analysis/qc_vectors/lambda/{sample}.bed",
+		   puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
+		log:
+		   lambda_log = "logs/qc_vectors/lambda.{sample}_QC.log",
+		   puc19_log = "logs/qc_vectors/puc19.{sample}_QC.log"
+		shell:
+		   """
+		   # >J02459.1 Escherichia phage Lambda, complete genome
+		   zcat {input.bed} | grep '^J02459.1' > {output.lambda_bed} 2> {log.lambda_log}
+		   #tabix -p {output.lambda_bed}
+		   # >M77789.2 Cloning vector pUC19, complete sequence
+		   zcat {input.bed} | grep '^M77789.2' > {output.puc19_bed} 2> {log.puc19_log}
+		   #tabix -p {output.puc19_bed}
+		   """
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       

@@ -7,6 +7,8 @@ trim_galore:
    q: 30 #  Trim low-quality ends from reads in addition to adapter removal. Default phred score is 20
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
+
+control_vectors: 1 # turn to 1 if this is an EMseq & was mapped to a genome including the control vectors with fasta headers ^J02459.1 (lamdba) and ^M77789.2 (puc19)
    
 sam_header: #
    PL: il
