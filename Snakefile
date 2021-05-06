@@ -171,7 +171,7 @@ rule biscuit_align:
         biscuit align -t {threads} -b {params.lib_type} \
         -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
         {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
-        samblaster -M -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+        samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
         samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
         samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
         samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
