@@ -9,8 +9,6 @@ min_version("5.20.1")
 
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
-# include rules from shared directory
-# include: "/secondary/projects/bbc/research/shared_snakemake/rules/fastq_qc/fastq_lengths"
 
 rule all:
     input:
@@ -34,27 +32,6 @@ rule all:
         # "analysis/pileup/combined_mergecg.bed.gz",
         # "analysis/pileup/combined_mergecg.bed.gz.tbi",
         # biscuit_qc
-        # expand("analysis/BISCUITqc/{samples.sample}_mapq_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_strand_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_isize_score_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_cpg_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_cpg_q40_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_cpg_q40_botgc_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_cpg_q40_topgc_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_botgc_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_topgc_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_all_cv_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_cpg_cv_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_cpg_dist_table.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_dup_report.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_CpHRetentionByReadPos.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_CpGRetentionByReadPos.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_CpGRetentionDist.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_freqOfTotalRetentionPerRead.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_totalBaseConversionRate.txt", samples=samples.itertuples()),
-        # expand("analysis/BISCUITqc/{samples.sample}_totalReadConversionRate.txt", samples=samples.itertuples()),
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
@@ -99,6 +76,7 @@ rule trim_galore:
     params:
         outdir = "analysis/trim_reads/",
         quality = config["trim_galore"]["q"],
+        hard_trim_R2 = config["hard_trim_R2"],
     envmodules:
         config["envmodules"]["trim_galore"],
         config["envmodules"]["fastqc"],
@@ -112,6 +90,7 @@ rule trim_galore:
         --paired \
         {input} \
         --output_dir {params.outdir} \
+        --clip_R2 {params.hard_trim_R2} \
         --cores {threads} \
         -q {params.quality} \
         --fastqc \

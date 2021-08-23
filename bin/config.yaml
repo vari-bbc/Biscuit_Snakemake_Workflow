@@ -8,11 +8,14 @@ trim_galore:
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
 
-control_vectors: 1 # turn to 1 if this is an EMseq & was mapped to a genome including the control vectors with fasta headers ^J02459.1 (lamdba) and ^M77789.2 (puc19)
-   
+control_vectors: 1 # turn to 1 if this is an EMseq & was mapped to a genome including the control vectors with fasta headers ^J02459.1 (lamdba) and ^M77789.2 (puc19). If this is turned on, then there will
+
+hard_trim_R2: 0 # --clip_R2 <int> argument from trim_galore
+# for swift kit, set this to 14
+
 sam_header: #
    PL: il
-   PU: nova
+   PU: nv
    LB: b1
    
 envmodules: # e.g. module load bbc/samtools/samtools-1.9
