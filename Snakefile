@@ -86,15 +86,26 @@ rule trim_galore:
         mem_gb=80
     shell:
         """
-        trim_galore \
-        --paired \
-        {input} \
-        --output_dir {params.outdir} \
-        --clip_R2 {params.hard_trim_R2} \
-        --cores {threads} \
-        -q {params.quality} \
-        --fastqc \
-        2> {log.stderr} 1> {log.stdout}
+        if [ {params.hard_trim_R2} > 0 ]; then
+			trim_galore \
+			--paired \
+			{input} \
+			--output_dir {params.outdir} \
+			--clip_R2 {params.hard_trim_R2} \
+			--cores {threads} \
+			-q {params.quality} \
+			--fastqc \
+			2> {log.stderr} 1> {log.stdout}
+		else
+			trim_galore \
+			--paired \
+			{input} \
+			--output_dir {params.outdir} \
+			--cores {threads} \
+			-q {params.quality} \
+			--fastqc \
+			2> {log.stderr} 1> {log.stdout}
+		fi
         """
 
 rule biscuit_align:
