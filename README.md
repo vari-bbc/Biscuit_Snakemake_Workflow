@@ -46,6 +46,10 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 + The output files in analysis/pileup/ may be imported into a `BSseq` object using `bicuiteer::readBiscuit()`.
 + analysis/multiqc/multiqc_report.html contains the methylation-specific BISCUIT QC modules (https://huishenlab.github.io/biscuit/docs/alignment/QC.html)
 
+# Test dataset
+
+This workflow comes with a working example dataset. To test the smakemake workflow on your system, place the 10 *_R[12]_fq.gz files in bin/working_example_dataset into raw_data/ and use the default bin/samples.tsv. These example files can be mapped to the human genome.
+
 # Diagram of workflow
 
 ![workflow diagram](bin/DAG.png)
