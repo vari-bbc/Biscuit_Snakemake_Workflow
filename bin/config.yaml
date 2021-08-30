@@ -19,7 +19,7 @@ hard_trim_R2: 14 # --clip_R2 <int> argument from trim_galore
 # for swift kit, set this to 14 or 15
 
 run_fastq_screen: 1 # run fastq_screen with --bisulfite mode
-
+fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf
 sam_header: #
    PL: il
    PU: nv
@@ -38,7 +38,8 @@ envmodules:
    multiqc: bbc/multiqc/multiqc-1.9
    parallel: bbc/parallel/parallel-20191122
    pigz: bbc/pigz/pigz-2.4
-   fastq_screen: bbc/pigz/pigz-2.4
+   fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
+   bismark: bbc/bismark/bismark-0.22.3
 
 hpcParameters:
    maxThreads: 32

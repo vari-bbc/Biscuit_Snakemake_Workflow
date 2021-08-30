@@ -39,7 +39,8 @@ rule all:
         # rule for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        "analysis/qc_vectors/control_vector_boxplot.pdf"
+        "analysis/qc_vectors/control_vector_boxplot.pdf", # for qc_vectors plot
+        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
 
 rule rename_fastq:
     output:
@@ -55,6 +56,45 @@ rule rename_fastq:
         config["envmodules"]["snakemake"],
     script:
         "bin/rename.R"
+
+if config["append_control_vectors"]:
+    assert bool(re.match(".*\.gz$", config["ref"]["fasta"])), "Reference fasta in the config.yaml needs to be gzipped!"
+    FORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa"]
+    newRef = "ref_with_meth_control_vectors/merged.fa.gz"
+    newIndex = newRef
+    rule append_control_vectors:
+        input:
+            config["ref"]["fasta"],
+        output:
+            newRef,
+            expand("ref_with_meth_control_vectors/merged.fa.gz.{ext}", ext=FORMATS)
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.ann",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.amb",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.par.bwt",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.dau.bwt",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.pac",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.par.sa",
+            # ~ "ref_with_meth_control_vectors/merged.fa.gz.dau.sa",
+        log:
+            "logs/control_vector_genome_build_index.log"
+        threads: 
+            config["hpcParameters"]["maxThreads"],
+        resources:
+            mem_gb=8
+        envmodules:
+            config["envmodules"]["R"],
+            config["envmodules"]["samtools"],
+            config["envmodules"]["biscuit"],
+        shell:
+            """
+            mkdir -p ref_with_meth_control_vectors
+            zcat bin/puc19.fa.gz bin/lambda.fa.gz {input} > {output}
+            biscuit index {output}
+            """
+else:
+    newRef = config["ref"]["fasta"],
+    newIndex = config["ref"]["index"], 
+
 
 rule trim_galore:
     input:
@@ -109,6 +149,31 @@ rule trim_galore:
         fi
         """
 
+if config["run_fastq_screen"]:
+    rule fastq_screen:
+        input:
+            expand("raw_data/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
+        output:
+            expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
+            expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples())
+        log:
+            "logs/fastq_screen/{samples.sample}.log",
+        params:
+            config = config["fastq_screen_conf"],
+        benchmark:
+            "benchmarks/fastq_screen/{samples.sample}.bmk"
+        threads: 8
+        resources:
+            nodes =  1,
+            mem_gb =  64,
+        envmodules: 
+            config["envmodules"]["fastq_screen"],
+            config["envmodules"]["bismark"],
+        shell:
+            """
+            fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log}
+            """
+
 rule biscuit_align:
     input:
         R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
@@ -124,7 +189,7 @@ rule biscuit_align:
         flagstat = "analysis/align/{sample}.sorted.markdup.bam.flagstat",
     params:
         # don't include the .fa/.fasta suffix for the reference biscuit idx.
-        ref = config["ref"]["index"],
+        ref = newRef,
         LB = config["sam_header"]["LB"],
         ID = "{sample}",
         PL = config["sam_header"]["PL"],
@@ -180,7 +245,7 @@ rule biscuit_pileup:
     input:
         bam="analysis/align/{sample}.sorted.markdup.bam",
     params:
-        ref=config["ref"]["fasta"],
+        ref=newRef,
         vcf="analysis/pileup/{sample}.vcf",
         bed="analysis/pileup/{sample}.bed",
     output:
@@ -222,7 +287,7 @@ rule biscuit_mergecg:
     input:
         bed="analysis/pileup/{sample}.bed.gz",
     params:
-        ref=config["ref"]["fasta"],
+        ref=newRef,
         mergecg="analysis/pileup/{sample}_mergecg.bed",
     output:
         mergecg_gz="analysis/pileup/{sample}_mergecg.bed.gz",
@@ -253,7 +318,7 @@ rule biscuit_qc:
         vcf="analysis/pileup/{sample}.vcf.gz",
         bam="analysis/align/{sample}.sorted.markdup.bam"
     params:
-        ref=config["ref"]["index"],
+        ref=newRef,
         assets=config["ref"]["assets"],
         sample="{sample}",
     output:
@@ -303,8 +368,19 @@ rule biscuit_qc:
         2> {log}
         """
 
+def get_multiQC_input(wildcards):
+    if config["run_fastq_screen"]:
+        input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen"
+        return input
+    else:
+        input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/"
+        return input
+        
 rule multiQC:
     input:
+        # fastq_screen
+        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
+        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         # trim_galore
         expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()),
         expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()),
@@ -323,9 +399,7 @@ rule multiQC:
         expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_cpg_topgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_cv_table.txt", samples=samples.itertuples()),
     params:
-        "raw_data/",
-        "analysis/trim_reads/",
-        "analysis/BISCUITqc/",
+        get_multiQC_input
     output:
         directory("analysis/multiqc/multiqc_report_data",),
         "analysis/multiqc/multiqc_report.html",
