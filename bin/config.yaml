@@ -1,25 +1,32 @@
 ref:
-  index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa
   fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
-  assets: /home/ian.beddows/canary/GRCh38_EMseq/hg38/
+  index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa
+  assets: /home/ian.beddows/canary/GRCh38_EMseq/hg38/ # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
 trim_galore:
    q: 30 #  Trim low-quality ends from reads in addition to adapter removal. Default phred score is 20
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
 
-control_vectors: 1 # turn to 1 if this is an EMseq & was mapped to a genome including the control vectors with fasta headers ^J02459.1 (lamdba) and ^M77789.2 (puc19). If this is turned on, then there will
+append_control_vectors: 0 # IF config["append_control_vectors"], THEN a new reference is used that includes the supplied reference and the 
+# control vectors.
+
+control_vectors: 1 # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
+# Only useful IF the ref genome included the control vectors with fasta headers ^J02459.1 (lamdba / unmethylated control) and ^M77789.2 (puc19 / methylated control). 
+# The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["append_control_vectors"].
 
 hard_trim_R2: 14 # --clip_R2 <int> argument from trim_galore
-# for swift kit, set this to 14
+# for swift kit, set this to 14 or 15
+
+run_fastq_screen: 1 # run fastq_screen with --bisulfite mode
 
 sam_header: #
    PL: il
    PU: nv
    LB: b1
    
-envmodules: # e.g. module load bbc/samtools/samtools-1.9
-   samtools: bbc/samtools/samtools-1.9
+envmodules: 
+   samtools: bbc/samtools/samtools-1.9 # "module load <string>" should work on your command line for all of the given modules!
    R: bbc/R/R-3.6.0
    snakemake: bbc/snakemake/snakemake-5.28.0
    trim_galore: bbc/trim_galore/trim_galore-0.6.0
@@ -31,6 +38,7 @@ envmodules: # e.g. module load bbc/samtools/samtools-1.9
    multiqc: bbc/multiqc/multiqc-1.9
    parallel: bbc/parallel/parallel-20191122
    pigz: bbc/pigz/pigz-2.4
+   fastq_screen: bbc/pigz/pigz-2.4
 
 hpcParameters:
    maxThreads: 32

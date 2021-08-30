@@ -1,6 +1,16 @@
 sample	group	fq1	fq2
-sample_1	D0	sample_1_R1.fastq.gz	sample_1_R2.fastq.gz
-sample_2	D0	sample_2_R1.fastq.gz	sample_2_R2.fastq.gz
-sample_3	D0	sample_3_R1.fastq.gz	sample_3_R2.fastq.gz
-sample_4	D0	sample_4_R1.fastq.gz	sample_4_R2.fastq.gz
-sample_5	D0	sample_5_R1.fastq.gz	sample_5_R2.fastq.gz
+1339cE		1339cE_L000_R1_001.fastq.gz	1339cE_L000_R2_001.fastq.gz
+1340aE		1340aE_L000_R1_001.fastq.gz	1340aE_L000_R2_001.fastq.gz
+1460hE		1460hE_L000_R1_001.fastq.gz	1460hE_L000_R2_001.fastq.gz
+1469dE		1469dE_L000_R1_001.fastq.gz	1469dE_L000_R2_001.fastq.gz
+1472aE		1472aE_L000_R1_001.fastq.gz	1472aE_L000_R2_001.fastq.gz
+1487dE		1487dE_L000_R1_001.fastq.gz	1487dE_L000_R2_001.fastq.gz
+1591hE		1591hE_L000_R1_001.fastq.gz	1591hE_L000_R2_001.fastq.gz
+1591hS		1591hS_L000_R1_001.fastq.gz	1591hS_L000_R2_001.fastq.gz
+1686bE		1686bE_L000_R1_001.fastq.gz	1686bE_L000_R2_001.fastq.gz
+1686bS		1686bS_L000_R1_001.fastq.gz	1686bS_L000_R2_001.fastq.gz
+1909gE		1909gE_L000_R1_001.fastq.gz	1909gE_L000_R2_001.fastq.gz
+1926cE		1926cE_L000_R1_001.fastq.gz	1926cE_L000_R2_001.fastq.gz
+1926cS		1926cS_L000_R1_001.fastq.gz	1926cS_L000_R2_001.fastq.gz
+1927cE		1927cE_L000_R1_001.fastq.gz	1927cE_L000_R2_001.fastq.gz
+2427aS		2427aS_L000_R1_001.fastq.gz	2427aS_L000_R2_001.fastq.gz
