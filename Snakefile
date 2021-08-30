@@ -39,6 +39,7 @@ rule all:
         # rule for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        "analysis/qc_vectors/control_vector_boxplot.pdf"
 
 rule rename_fastq:
     output:
@@ -362,15 +363,30 @@ if config["control_vectors"]:
            puc19_log = "logs/qc_vectors/puc19.{sample}_QC.log"
         shell:
            """
-           # >J02459.1 Escherichia phage Lambda, complete genome
-           zcat {input.bed} | grep '^J02459.1' > {output.lambda_bed} 2> {log.lambda_log}
-           #tabix -p {output.lambda_bed}
-           # >M77789.2 Cloning vector pUC19, complete sequence
-           zcat {input.bed} | grep '^M77789.2' > {output.puc19_bed} 2> {log.puc19_log}
-           #tabix -p {output.puc19_bed}
+           mkdir -p "analysis/qc_vectors/lambda/"
+           mkdir -p "analysis/qc_vectors/puc19/"
+           
+           # >J02459.1 Escherichia phage Lambda, complete genome - UNMETHYLATED CONTROL
+           zcat {input.bed} | {{ grep '^J02459.1' || true; }} > {output.lambda_bed} 2> {log.lambda_log}
+           
+           # >M77789.2 Cloning vector pUC19, complete sequence - METHYLATED CONTROL
+           zcat {input.bed} | {{ grep '^M77789.2' || true; }}  > {output.puc19_bed} 2> {log.puc19_log}
            """
        
-       
+    rule control_vectors_plot:
+        input:
+           expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()),
+           expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()),
+        envmodules:
+           config["envmodules"]["R"],
+        resources:
+            mem_gb=32
+        output:
+           control_vector_pdf = "analysis/qc_vectors/control_vector_boxplot.pdf"
+        log:
+           control_vector_pdf = "logs/qc_vectors/control_vector_pdf.log",
+        script:
+            "bin/control_vector.R"       
        
        
        
