@@ -87,25 +87,25 @@ rule trim_galore:
     shell:
         """
         if [ {params.hard_trim_R2} > 0 ]; then
-			trim_galore \
-			--paired \
-			{input} \
-			--output_dir {params.outdir} \
-			--clip_R2 {params.hard_trim_R2} \
-			--cores {threads} \
-			-q {params.quality} \
-			--fastqc \
-			2> {log.stderr} 1> {log.stdout}
-		else
-			trim_galore \
-			--paired \
-			{input} \
-			--output_dir {params.outdir} \
-			--cores {threads} \
-			-q {params.quality} \
-			--fastqc \
-			2> {log.stderr} 1> {log.stdout}
-		fi
+            trim_galore \
+            --paired \
+            {input} \
+            --output_dir {params.outdir} \
+            --clip_R2 {params.hard_trim_R2} \
+            --cores {threads} \
+            -q {params.quality} \
+            --fastqc \
+            2> {log.stderr} 1> {log.stdout}
+        else
+            trim_galore \
+            --paired \
+            {input} \
+            --output_dir {params.outdir} \
+            --cores {threads} \
+            -q {params.quality} \
+            --fastqc \
+            2> {log.stderr} 1> {log.stdout}
+        fi
         """
 
 rule biscuit_align:
@@ -346,27 +346,29 @@ rule multiQC:
         """
 
 if config["control_vectors"]:
-	rule control_vectors:
-		input:
-		   bed="analysis/pileup/{sample}_mergecg.bed.gz",
-		envmodules:
-		   config["envmodules"]["samtools"],
-		   config["envmodules"]["htslib"],
-		output:
-		   lambda_bed = "analysis/qc_vectors/lambda/{sample}.bed",
-		   puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
-		log:
-		   lambda_log = "logs/qc_vectors/lambda.{sample}_QC.log",
-		   puc19_log = "logs/qc_vectors/puc19.{sample}_QC.log"
-		shell:
-		   """
-		   # >J02459.1 Escherichia phage Lambda, complete genome
-		   zcat {input.bed} | grep '^J02459.1' > {output.lambda_bed} 2> {log.lambda_log}
-		   #tabix -p {output.lambda_bed}
-		   # >M77789.2 Cloning vector pUC19, complete sequence
-		   zcat {input.bed} | grep '^M77789.2' > {output.puc19_bed} 2> {log.puc19_log}
-		   #tabix -p {output.puc19_bed}
-		   """
+    rule control_vectors:
+        input:
+           bed="analysis/pileup/{sample}_mergecg.bed.gz",
+        envmodules:
+           config["envmodules"]["samtools"],
+           config["envmodules"]["htslib"],
+        output:
+           lambda_bed = "analysis/qc_vectors/lambda/{sample}.bed",
+           puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
+        resources:
+            mem_gb=32
+        log:
+           lambda_log = "logs/qc_vectors/lambda.{sample}_QC.log",
+           puc19_log = "logs/qc_vectors/puc19.{sample}_QC.log"
+        shell:
+           """
+           # >J02459.1 Escherichia phage Lambda, complete genome
+           zcat {input.bed} | grep '^J02459.1' > {output.lambda_bed} 2> {log.lambda_log}
+           #tabix -p {output.lambda_bed}
+           # >M77789.2 Cloning vector pUC19, complete sequence
+           zcat {input.bed} | grep '^M77789.2' > {output.puc19_bed} 2> {log.puc19_log}
+           #tabix -p {output.puc19_bed}
+           """
        
        
        
