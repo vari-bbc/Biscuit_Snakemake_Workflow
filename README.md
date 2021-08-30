@@ -13,6 +13,7 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 	5. [optional] QC methylated and unmethylated controls
 	6. [optional] Build and index reference
 
+Many options can be easily specified in the config.yaml!
 
 # Running the workflow
 
