@@ -152,7 +152,7 @@ rule trim_galore:
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            expand("raw_data/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
+            expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
         output:
             expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
             expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples())
