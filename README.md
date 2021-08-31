@@ -58,7 +58,7 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 
 # Helpful snakemake commands for debugging a workflow
 
-snakemake -npR # test run
+snakemake -npr # test run
 
 `snakemake --unlock --cores 1` # unlock after a manually aborted run
 
