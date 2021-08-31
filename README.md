@@ -9,10 +9,11 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 	2. Alignment, duplicate tagging, indexing, flagstat 
 	3. Methylation information extraction (BED Format)
 	4. Merge C annd G beta values in CpG dinucleotide context
-	4. MultiQC with BICUIT QC modules specifically for methyaltion data
-	5. [default off] fastq_screen (using Bismark - https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/
-	6. [default off] Modify and index reference to include control vectors
-	7. [default off] QC methylated and unmethylated controls
+	5. SNP and Epiread extraction
+	6. MultiQC with BICUIT QC modules specifically for methyaltion data
+	7. [default off] fastq_screen (using Bismark - https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/
+	8. [default off] Modify and index reference to include control vectors
+	9. [default off] QC methylated and unmethylated controls
 
 Many options can be easily specified in the config.yaml!
 
