@@ -9,6 +9,7 @@ min_version("5.20.1")
 
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
+biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa"]
 
 rule all:
     input:
@@ -35,13 +36,16 @@ rule all:
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
-        # expand("analysis/fastq_lengths/{sample}-{read}.sample100000.seed123.fq_lens.txt", sample=samples["sample"], read=["R1","R2"]),
-        # rule for quality control vectors
+        # rules for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         "analysis/qc_vectors/control_vector_boxplot.pdf", # for qc_vectors plot
+        # rules for fastq_screen
         expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
-
+        
+        # output of rule append_control_vectors
+        expand("ref_with_meth_control_vectors/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
+        
 rule rename_fastq:
     output:
         "raw_data/{sample}-R1.fastq.gz",
@@ -58,16 +62,16 @@ rule rename_fastq:
         "bin/rename.R"
 
 if config["append_control_vectors"]:
-    assert bool(re.match(".*\.gz$", config["ref"]["fasta"])), "Reference fasta in the config.yaml needs to be gzipped!"
-    FORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa"]
-    newRef = "ref_with_meth_control_vectors/merged.fa.gz"
+    assert bool(re.match(".*\.gz$", config["ref"]["fasta"])), "Reference fasta in the config.yaml needs to be gzipped!"  
+    newRef = "snakemake_built_reference_with_methylation_controls/merged.fa.gz"
     newIndex = newRef
     rule append_control_vectors:
         input:
             config["ref"]["fasta"],
         output:
-            newRef,
-            expand("ref_with_meth_control_vectors/merged.fa.gz.{ext}", ext=FORMATS)
+            ref = newRef,
+            newrefdir = 'snakemake_built_reference_with_methylation_controls/'
+            indexes = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
             # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.ann",
             # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.amb",
             # ~ "ref_with_meth_control_vectors/merged.fa.gz.par.bwt",
@@ -87,9 +91,9 @@ if config["append_control_vectors"]:
             config["envmodules"]["biscuit"],
         shell:
             """
-            mkdir -p ref_with_meth_control_vectors
-            zcat bin/puc19.fa.gz bin/lambda.fa.gz {input} > {output}
-            biscuit index {output}
+            mkdir -p {output.newrefdir}
+            cat bin/puc19.fa.gz bin/lambda.fa.gz {input} > {output.ref}
+            biscuit index {output.ref}
             """
 else:
     newRef = config["ref"]["fasta"],
