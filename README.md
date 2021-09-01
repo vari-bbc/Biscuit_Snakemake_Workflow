@@ -55,8 +55,11 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 
 # Diagram of workflow
 
-![workflow diagram](bin/DAG.png)
+## Default workflow
+![workflow diagram](bin/DAG_defaults.png)
 
+## Expanded workflow
+![workflow diagram](bin/DAG.png)
 # Helpful snakemake commands for debugging a workflow
 
 snakemake -npr # test run
