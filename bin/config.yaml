@@ -1,6 +1,6 @@
 ref:
-  fasta: /home/ian.beddows/UBC_Mike_SHEH_20210623_WGBS/dev2/WGBS_Biscuit_Snakemake/test.fa.gz
-  #~ fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
+  #~ fasta: /home/ian.beddows/UBC_Mike_SHEH_20210623_WGBS/dev2/WGBS_Biscuit_Snakemake/test.fa.gz
+  fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
   index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa
   assets: /home/ian.beddows/canary/GRCh38_EMseq/hg38/ # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
@@ -9,27 +9,33 @@ trim_galore:
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
 
-append_control_vectors: 0 # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
+build_ref_with_methylation_controls: 0 # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
 # This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors.
 
 control_vectors: 0 # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
 # Only useful IF the ref genome included the control vectors with fasta headers ^J02459.1 (lamdba / unmethylated control) and ^M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["append_control_vectors"].
 
-hard_trim_R2: 0 # --clip_R2 <int> argument from trim_galore
+hard_trim_R2: 1 # --clip_R2 <int> argument from trim_galore
 # for swift kit, set this to 14 or 15
 
 run_fastq_screen: 0 # run fastq_screen with --bisulfite mode
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
+ 
+generate_snps: 0
+epiread: 0
 
 sam_header: #
    PL: il
    PU: nv
    LB: b1
-   
+  
+  
+# If your system does not use environemntal modules, then the executables for all of the modules must be in your path. If all dependency
+# executables are in your path, then 
 envmodules: 
-   samtools: bbc/samtools/samtools-1.9 # "module load <string>" should work on your command line for all of the given modules!
-   R: bbc/R/R-3.6.0
+   samtools: bbc/samtools/samtools-1.9 # "module load <string>" should work on your command line, e.g. "module load samtools/samtools-1.9"
+   R: bbc/R/R-3.6.0 # 
    snakemake: bbc/snakemake/snakemake-5.28.0
    trim_galore: bbc/trim_galore/trim_galore-0.6.0
    #~ biscuit: bbc/biscuit/biscuit_0_3_16
@@ -43,8 +49,10 @@ envmodules:
    pigz: bbc/pigz/pigz-2.4
    fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
    bismark: bbc/bismark/bismark-0.22.3
+   fake: bbc/thisisfake/bismark-0.22.3
 
 hpcParameters:
    maxThreads: 32
    maxMemoryGb: 250
+   intermediateMemoryGb: 100
    trimThreads: 8

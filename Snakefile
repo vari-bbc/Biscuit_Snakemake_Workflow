@@ -39,16 +39,17 @@ rule all:
         # rules for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        "analysis/qc_vectors/control_vector_boxplot.pdf", # for qc_vectors plot
+        "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
         # rules for fastq_screen
         expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
-        # output of rule append_control_vectors
+        # output of rule build_ref_with_methylation_controls
         expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
         
-        # snps
+        # epiread
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
-        expand("analysis/epiread/{samples.sample}.epibed", samples=samples.itertuples()) if config["epiread"] else [],
+        expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        # snps
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
         
 rule rename_fastq:
@@ -162,16 +163,22 @@ rule trim_galore:
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
+            # ~ expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
+            read1 = "raw_data/{sample}-R1.fastq.gz",
+            read2 = "raw_data/{sample}-R2.fastq.gz",
         output:
-            expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
-            expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples())
+            # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
+            # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples())
+            "analysis/fastq_screen/{sample}-R1_screen.html",
+            "analysis/fastq_screen/{sample}-R2_screen.html",
+            "analysis/fastq_screen/{sample}-R1_screen.txt",
+            "analysis/fastq_screen/{sample}-R2_screen.txt",
         log:
-            "logs/fastq_screen/{samples.sample}.log",
+            "logs/fastq_screen/{sample}.log",
         params:
             config = config["fastq_screen_conf"],
         benchmark:
-            "benchmarks/fastq_screen/{samples.sample}.bmk"
+            "benchmarks/fastq_screen/{sample}.bmk"
         threads: 8
         resources:
             nodes = 1,
@@ -183,11 +190,20 @@ if config["run_fastq_screen"]:
             """
             fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log}
             """
+def get_biscuit_align_input(wildcards):
+    if config["build_ref_with_methylation_controls"]:
+        input = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
+        return input
+    else:
+        input = config["ref"]["fasta"] # else just require default reference
+        return input
 
 rule biscuit_align:
     input:
+        get_biscuit_align_input,
         R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
         R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
+        
     output:
         bam = "analysis/align/{sample}.sorted.markdup.bam",
         bai = "analysis/align/{sample}.sorted.markdup.bam.bai",
@@ -234,7 +250,7 @@ rule biscuit_align:
         config["envmodules"]["htslib"],
     shell:
         """
-        biscuit align -t {threads} -b {params.lib_type} \
+        biscuit align -@     {threads} -b {params.lib_type} \
         -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
         {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
         samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
@@ -478,7 +494,8 @@ if config["generate_snps"] or config["epiread"]:
            vcf_gz = "analysis/pileup/{sample}.vcf.gz",
            bam="analysis/align/{sample}.sorted.markdup.bam",
         output:
-           snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz"
+           snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz",
+           snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         envmodules:
            config["envmodules"]["biscuit"],
         params:
@@ -505,20 +522,20 @@ if config["epiread"]:
            config["envmodules"]["biscuit"],
            config["envmodules"]["htslib"],
         params:
-            reference = newRef
+            reference = newRef,
+            epibed = "analysis/epiread/{sample}.epibed"
         resources:
             mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
-        params:
-            epibed = "analysis/epiread/{sample}.epibed"
         output:
-            epibed_gz = "analysis/epiread/{sample}.epibed.gz"
+            epibed_gz = "analysis/epiread/{sample}.epibed.gz",
+            epibed_gz_tbi = "analysis/epiread/{sample}.epibed.gz.tbi",
         log:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
            """
-           biscuit epiread -B {input.mergecg_gz} {params.reference} {input.bam} > {params.epibed}
+           biscuit epiread -B {input.mergecg_gz} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
            bgzip {params.epibed}
-           tabix -p bed {output.epibed}
+           tabix -p bed {output.epibed_gz}
            """
        
        

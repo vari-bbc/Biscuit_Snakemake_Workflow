@@ -9,7 +9,7 @@ import_emseq <- function(dir){
   myReturnDF <- NULL
   files <- list.files(dir)
   for(f in files){
-    if(file.info(f)$size>0){
+    if(file.info(paste0(dir,f))$size>0){
       name <- gsub('\\.bed','',f)
       print(cat('File',f,name,'\n'))
       myBed <- read.delim(paste0(dir,f),sep="\t",header=FALSE)
@@ -25,10 +25,9 @@ import_emseq <- function(dir){
 }
 
 # set the base directory
-# baseDir <- '/Volumes/projects_secondary/shen/projects/SHEH_20210623_WGBS/dev2/WGBS_Biscuit_Snakemake/'
 baseDir <- './'
-posControlDir <- 'analysis/puc19/'
-negControlDir <- 'analysis/lambda/'
+posControlDir <- 'analysis/qc_vectors/puc19/'
+negControlDir <- 'analysis/qc_vectors/lambda/'
 # NEGATIVE CONTROL
 dir <- paste0(baseDir,negControlDir)
 # dir <- '../analysis/qc_vectors/lambda/'
@@ -44,7 +43,8 @@ if(exists("x")){
     theme_bw() +
     # ylim(c(0,max(x$depth,na.rm=TRUE))) +
     theme(
-      axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      # axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      axis.text.x = element_blank(),
       axis.text.y = element_text(size=12), 
       axis.title.y = element_text(size=25), 
       plot.title = element_text(size=25,hjust=0.5),
@@ -61,7 +61,7 @@ if(exists("x")){
     theme_bw() +
     ylim(c(0,1)) +
     theme(
-      axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      axis.text.x = element_text(angle=60,hjust=1,size=10), 
       axis.text.y = element_text(size=12), 
       axis.title.y = element_text(size=25), 
       plot.title = element_text(size=25,hjust=0.5),
@@ -87,7 +87,8 @@ if(exists("x")){
     theme_bw() +
     # ylim(c(0,max(x$depth,na.rm=TRUE))) +
     theme(
-      axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      # axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      axis.text.x = element_blank(),
       axis.text.y = element_text(size=12), 
       axis.title.y = element_text(size=27), 
       plot.title = element_text(size=27,hjust=0.5),
@@ -104,7 +105,7 @@ if(exists("x")){
     theme_bw() +
     ylim(c(0,1)) +
     theme(
-      axis.text.x = element_text(angle=60,hjust=1,size=12), 
+      axis.text.x = element_text(angle=60,hjust=1,size=10), 
       axis.text.y = element_text(size=12), 
       axis.title.y = element_text(size=25), 
       plot.title = element_text(size=25,hjust=0.5),
