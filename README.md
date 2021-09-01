@@ -35,14 +35,14 @@ Many options can be easily specified in the config.yaml!
 		
 		
 + Modify the config.yaml to specify the appropriate 
-	+ Reference genome 
+	+ Reference genome
 	+ Biscuit index
 	+ Biscuit QC assets (https://github.com/huishenlab/biscuit/releases/tag/v0.3.16.20200420)
-	+ Environmental modules (If you do not have these modules, the executables for the required programs are in the path. It will give a warning but run)
-	+ Additional parameters
+	+ Environmental modules (If modules are not available, snakemake gives a warning but will run successfully *as long as the required executables are in the path*)
+	+ Turn on any optional workflow components
 
 
-+ Submit the workflow to an HPC using something similar to bin/run_snake.sh (e.g. qsub -q [queue_name] bin/run_snake.sh)
++ Submit the workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
 
 # After the workflow
 
