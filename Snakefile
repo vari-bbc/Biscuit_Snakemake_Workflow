@@ -44,7 +44,12 @@ rule all:
         expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
         # output of rule append_control_vectors
-        expand("ref_with_meth_control_vectors/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
+        expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
+        
+        # snps
+        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        expand("analysis/epiread/{samples.sample}.epibed", samples=samples.itertuples()) if config["epiread"] else [],
+        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
         
 rule rename_fastq:
     output:
@@ -61,16 +66,16 @@ rule rename_fastq:
     script:
         "bin/rename.R"
 
-if config["append_control_vectors"]:
+if config["build_ref_with_methylation_controls"]:
     assert bool(re.match(".*\.gz$", config["ref"]["fasta"])), "Reference fasta in the config.yaml needs to be gzipped!"  
     newRef = "snakemake_built_reference_with_methylation_controls/merged.fa.gz"
     newIndex = newRef
-    rule append_control_vectors:
+    rule build_ref_with_methylation_controls:
         input:
             config["ref"]["fasta"],
         output:
             ref = newRef,
-            newrefdir = 'snakemake_built_reference_with_methylation_controls/'
+            newrefdir = directory('snakemake_built_reference_with_methylation_controls/'),
             indexes = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
             # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.ann",
             # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.amb",
@@ -94,6 +99,7 @@ if config["append_control_vectors"]:
             mkdir -p {output.newrefdir}
             cat bin/puc19.fa.gz bin/lambda.fa.gz {input} > {output.ref}
             biscuit index {output.ref}
+            samtools faidx {output.ref}
             """
 else:
     newRef = config["ref"]["fasta"],
@@ -168,8 +174,8 @@ if config["run_fastq_screen"]:
             "benchmarks/fastq_screen/{samples.sample}.bmk"
         threads: 8
         resources:
-            nodes =  1,
-            mem_gb =  64,
+            nodes = 1,
+            mem_gb = 64,
         envmodules: 
             config["envmodules"]["fastq_screen"],
             config["envmodules"]["bismark"],
@@ -267,7 +273,7 @@ rule biscuit_pileup:
         bed_tbi="logs/biscuit_pileup/bed_tabix.{sample}.log",
     threads: 8
     resources:
-        mem_gb=100
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
     benchmark:
         "benchmarks/biscuit_pileup/{sample}.txt"
     wildcard_constraints:
@@ -278,7 +284,7 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        biscuit pileup -q {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
         bgzip {params.vcf} 2> {log.vcf_gz}
         tabix -p vcf {output.vcf_gz} 2> {log.vcf_tbi}
 
@@ -302,7 +308,7 @@ rule biscuit_mergecg:
         mergecg_tbi="logs/biscuit_pileup/mergecg_tabix.{sample}.log",
     threads: 8
     resources:
-        mem_gb=100
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
     benchmark:
         "benchmarks/biscuit_mergecg/{sample}.txt"
     wildcard_constraints:
@@ -348,7 +354,7 @@ rule biscuit_qc:
         "analysis/BISCUITqc/{sample}_CpGRetentionByReadPos.txt",
     threads: 8
     resources:
-        mem_gb=100
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
     benchmark:
         "benchmarks/biscuit_qc/{sample}.txt"
     log:
@@ -411,7 +417,7 @@ rule multiQC:
         "logs/multiqc.log"
     threads: 1
     resources:
-        mem_gb=32
+        mem_gb=8
     benchmark:
         "benchmarks/multiQC.txt"
     envmodules:
@@ -466,7 +472,54 @@ if config["control_vectors"]:
         script:
             "bin/control_vector.R"       
        
-       
+if config["generate_snps"] or config["epiread"]:
+    rule snps:
+        input: 
+           vcf_gz = "analysis/pileup/{sample}.vcf.gz",
+           bam="analysis/align/{sample}.sorted.markdup.bam",
+        output:
+           snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz"
+        envmodules:
+           config["envmodules"]["biscuit"],
+        params:
+           reference = newRef,
+           snp_bed = "analysis/snps/{sample}.snp.bed"
+        resources:
+           mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        log:
+           epiread = "logs/snps/snps.{sample}.log",
+        shell:
+           """
+           biscuit vcf2bed -t snp {input.vcf_gz} > {params.snp_bed}
+           bgzip {params.snp_bed}
+           tabix -p bed {output.snp_bed_gz}
+           """
+
+if config["epiread"]:
+    rule epiread:
+        input: 
+            mergecg_gz="analysis/pileup/{sample}_mergecg.bed.gz",
+            mergecg_tbi="analysis/pileup/{sample}_mergecg.bed.gz.tbi",
+            bam="analysis/align/{sample}.sorted.markdup.bam",
+        envmodules:
+           config["envmodules"]["biscuit"],
+           config["envmodules"]["htslib"],
+        params:
+            reference = newRef
+        resources:
+            mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        params:
+            epibed = "analysis/epiread/{sample}.epibed"
+        output:
+            epibed_gz = "analysis/epiread/{sample}.epibed.gz"
+        log:
+           epiread = "logs/epiread/epiread.{sample}.log",
+        shell:
+           """
+           biscuit epiread -B {input.mergecg_gz} {params.reference} {input.bam} > {params.epibed}
+           bgzip {params.epibed}
+           tabix -p bed {output.epibed}
+           """
        
        
        
