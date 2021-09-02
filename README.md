@@ -5,6 +5,7 @@ BISCUIT was written to perform alignment, DNA methylation and mutation calling, 
 Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 
 # Components of the workflow
+	0. [default off] Modify and index genome reference to including methylation controls
 	1. Trim adapters
 	2. Alignment, duplicate tagging, indexing, flagstat 
 	3. Methylation information extraction (BED Format)
@@ -12,8 +13,7 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 	5. SNP and Epiread extraction
 	6. MultiQC with BICUIT QC modules specifically for methyaltion data
 	7. [default off] fastq_screen (using Bismark - https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/
-	8. [default off] Modify and index reference to include control vectors
-	9. [default off] QC methylated and unmethylated controls
+	8. [default off] QC methylated and unmethylated controls
 
 Many options can be easily specified in the config.yaml!
 
