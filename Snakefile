@@ -84,6 +84,8 @@ if config["build_ref_with_methylation_controls"]:
             2,
         resources:
             mem_gb=32
+        benchmark:
+            "benchmarks/build_ref_with_methylation_controls.txt"    
         envmodules:
             config["envmodules"]["R"],
             config["envmodules"]["samtools"],
