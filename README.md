@@ -56,16 +56,16 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 # Diagrams of possible workflows
 
 ## Default workflow - 1 sample
-![workflow diagram](bin/DAGs/one_sample_DAG_default_workflow.pdf)
+![workflow diagram](bin/DAGs/one_sample_DAG_default_workflow.png)
 
 ## Full workflow - 5 samples
-![workflow diagram](bbin/DAGs/one_sample_DAG_full_workflow.pdf)
+![workflow diagram](bbin/DAGs/one_sample_DAG_full_workflow.png)
 
 ## Default workflow - 5 samples
-![workflow diagram](bin/DAGs/five_sample_DAG_default_workflow.pdf)
+![workflow diagram](bin/DAGs/five_sample_DAG_default_workflow.png)
 
 ## Full workflow - 1 sample
-![workflow diagram](bbin/DAGs/five_sample_DAG_full_workflow.pdf)
+![workflow diagram](bbin/DAGs/five_sample_DAG_full_workflow.png)
 
 # Helpful snakemake commands for debugging a workflow
 
