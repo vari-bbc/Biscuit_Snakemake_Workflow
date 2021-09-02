@@ -448,6 +448,8 @@ if config["control_vectors"]:
            puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
         resources:
             mem_gb=32
+        benchmark:
+            "benchmarks/methylation_controls_qc/{sample}.txt"
         log:
            lambda_log = "logs/qc_vectors/lambda.{sample}_QC.log",
            puc19_log = "logs/qc_vectors/puc19.{sample}_QC.log"
@@ -488,6 +490,8 @@ if config["generate_snps"] or config["epiread"]:
            snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         envmodules:
            config["envmodules"]["biscuit"],
+        benchmark:
+            "benchmarks/biscuit_snps/{sample}.txt"        
         params:
            reference = newRef,
            snp_bed = "analysis/snps/{sample}.snp.bed"
@@ -514,6 +518,8 @@ if config["epiread"]:
         params:
             reference = newRef,
             epibed = "analysis/epiread/{sample}.epibed"
+        benchmark:
+            "benchmarks/biscuit_epiread/{sample}.txt"    
         resources:
             mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
         output:
