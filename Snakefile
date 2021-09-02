@@ -9,7 +9,7 @@ min_version("5.20.1")
 
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
-biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa"]
+biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa","fai"]
 
 rule all:
     input:
@@ -78,19 +78,12 @@ if config["build_ref_with_methylation_controls"]:
             ref = newRef,
             newrefdir = directory('snakemake_built_reference_with_methylation_controls/'),
             indexes = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.ann",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.amb",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.par.bwt",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.dau.bwt",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.bis.pac",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.par.sa",
-            # ~ "ref_with_meth_control_vectors/merged.fa.gz.dau.sa",
         log:
             "logs/control_vector_genome_build_index.log"
         threads: 
             config["hpcParameters"]["maxThreads"],
         resources:
-            mem_gb=8
+            mem_gb=32
         envmodules:
             config["envmodules"]["R"],
             config["envmodules"]["samtools"],
@@ -163,18 +156,15 @@ rule trim_galore:
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            # ~ expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
             read1 = "raw_data/{sample}-R1.fastq.gz",
             read2 = "raw_data/{sample}-R2.fastq.gz",
         output:
-            # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()),
-            # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples())
             "analysis/fastq_screen/{sample}-R1_screen.html",
             "analysis/fastq_screen/{sample}-R2_screen.html",
             "analysis/fastq_screen/{sample}-R1_screen.txt",
             "analysis/fastq_screen/{sample}-R2_screen.txt",
         log:
-            "logs/fastq_screen/{sample}.log",
+            fastq_screen = "logs/fastq_screen/{sample}.log",
         params:
             config = config["fastq_screen_conf"],
         benchmark:
@@ -188,7 +178,7 @@ if config["run_fastq_screen"]:
             config["envmodules"]["bismark"],
         shell:
             """
-            fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log}
+            fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log.fastq_screen}
             """
 def get_biscuit_align_input(wildcards):
     if config["build_ref_with_methylation_controls"]:

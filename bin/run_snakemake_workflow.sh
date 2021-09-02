@@ -1,7 +1,7 @@
 #PBS -l walltime=400:00:00
 #PBS -l mem=8gb
 #PBS -m ae
-#PBS -N WGBS
+#PBS -N SNAKEMASTER
 #PBS -o logs/workflow.o
 #PBS -e logs/workflow.e
 
