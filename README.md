@@ -53,13 +53,20 @@ Many options can be easily specified in the config.yaml!
 
 This workflow comes with a working example dataset. To test the smakemake workflow on your system, place the 10 *_R[12]_fq.gz files in bin/working_example_dataset into raw_data/ and use the default bin/samples.tsv. These example files can be mapped to the human genome.
 
-# Diagram of workflow
+# Diagrams of possible workflows
 
-## Default workflow
-![workflow diagram](bin/DAG_defaults.png)
+## Default workflow - 1 sample
+![workflow diagram](bin/DAGs/one_sample_DAG_default_workflow.png)
 
-## Expanded workflow
-![workflow diagram](bin/DAG.png)
+## Full workflow - 5 samples
+![workflow diagram](bbin/DAGs/one_sample_DAG_full_workflow.png)
+
+## Default workflow - 5 samples
+![workflow diagram](bin/DAGs/five_sample_DAG_default_workflow.png)
+
+## Full workflow - 1 sample
+![workflow diagram](bbin/DAGs/five_sample_DAG_full_workflow.png)
+
 # Helpful snakemake commands for debugging a workflow
 
 snakemake -npr # test run
