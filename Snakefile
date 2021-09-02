@@ -81,7 +81,7 @@ if config["build_ref_with_methylation_controls"]:
         log:
             "logs/control_vector_genome_build_index.log"
         threads: 
-            config["hpcParameters"]["maxThreads"],
+            2,
         resources:
             mem_gb=32
         envmodules:
