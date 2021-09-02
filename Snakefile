@@ -447,7 +447,7 @@ rule multiQC:
         """
 
 if config["control_vectors"]:
-    rule control_vectors:
+    rule methylation_controls_qc:
         input:
            bed="analysis/pileup/{sample}_mergecg.bed.gz",
         envmodules:
@@ -473,7 +473,7 @@ if config["control_vectors"]:
            zcat {input.bed} | {{ grep '^M77789.2' || true; }}  > {output.puc19_bed} 2> {log.puc19_log}
            """
        
-    rule control_vectors_plot:
+    rule methylation_controls_figure:
         input:
            expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()),
            expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()),
@@ -489,7 +489,7 @@ if config["control_vectors"]:
             "bin/control_vector.R"       
        
 if config["generate_snps"] or config["epiread"]:
-    rule snps:
+    rule biscuit_snps:
         input: 
            vcf_gz = "analysis/pileup/{sample}.vcf.gz",
            bam="analysis/align/{sample}.sorted.markdup.bam",
@@ -513,11 +513,11 @@ if config["generate_snps"] or config["epiread"]:
            """
 
 if config["epiread"]:
-    rule epiread:
+    rule biscuit_epiread:
         input: 
-            mergecg_gz="analysis/pileup/{sample}_mergecg.bed.gz",
-            mergecg_tbi="analysis/pileup/{sample}_mergecg.bed.gz.tbi",
-            bam="analysis/align/{sample}.sorted.markdup.bam",
+            bam = "analysis/align/{sample}.sorted.markdup.bam",
+            snps = "analysis/snps/{sample}.snp.bed.gz",
+            snps_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi",
         envmodules:
            config["envmodules"]["biscuit"],
            config["envmodules"]["htslib"],
@@ -533,7 +533,7 @@ if config["epiread"]:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
            """
-           biscuit epiread -B {input.mergecg_gz} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+           biscuit epiread -B {input.snps} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
            bgzip {params.epibed}
            tabix -p bed {output.epibed_gz}
            """
