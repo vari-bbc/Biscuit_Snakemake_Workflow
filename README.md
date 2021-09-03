@@ -46,10 +46,10 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 + Replace the example `bin/samples.tsv` with your own sample sheet containing:
 	+ A row for each sample
 	+ The following three columns
-		A. `sample_1`
-		B. `fq1` (name of R1 file for `sample_1` in `raw_data/`)
-		C. `fq2` (name of R2 file for `sample_1` in `raw_data/`)
-		D. Any other columns included are ignored
+		+ A. `sample_1`
+		+ B. `fq1` (name of R1 file for `sample_1` in `raw_data/`)
+		+ C. `fq2` (name of R2 file for `sample_1` in `raw_data/`)
+		+ D. Any other columns included are ignored
 		
 		
 + Modify the config.yaml to specify the appropriate 
