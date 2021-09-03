@@ -19,19 +19,20 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 
 # Dependencies
 
-BISCUIT
-R with packages tidyverse, patchwork, and viridis.
-SAMTools
-Snakemake 1.6.0 
-samblaster
-htslib
-bedtools
-pigz
-parallel
-bismark (only required if running fastq_screen)
-fastq_screen (only required if running fastq_screen)
-multiQC
-parallel
+ + BISCUIT
+ + R with packages tidyverse, patchwork, and viridis (only required for plotting methylation controls)
+ + SAMTools 
+ + Snakemake 1.6.0 
+ + samblaster
+ + htslib
+ + bedtools
+ + pigz
+ + parallel
+ + bismark (only required if running fastq_screen)
+ + fastq_screen (only required if running fastq_screen)
+ + fastQC
+ + multiQC
+ + parallel
 
 
 # Running the workflow
@@ -45,10 +46,10 @@ parallel
 + Replace the example `bin/samples.tsv` with your own sample sheet containing:
 	+ A row for each sample
 	+ The following three columns
-		A. `sample_1`
-		B. `fq1` (name of R1 file for `sample_1` in `raw_data/`)
-		C. `fq2` (name of R2 file for `sample_1` in `raw_data/`)
-		D. Any other columns included are ignored
+		+ A. `sample_1`
+		+ B. `fq1` (name of R1 file for `sample_1` in `raw_data/`)
+		+ C. `fq2` (name of R2 file for `sample_1` in `raw_data/`)
+		+ D. Any other columns included are ignored
 		
 		
 + Modify the config.yaml to specify the appropriate 
@@ -56,7 +57,8 @@ parallel
 	+ Biscuit index
 	+ Biscuit QC assets (https://github.com/huishenlab/biscuit/releases/tag/v0.3.16.20200420)
 	+ Environmental modules (If modules are not available, snakemake gives a warning but will run successfully *as long as the required executables are in the path*)
-	+ Turn on any optional workflow components
+	+ Toggle optional workflow components
+	+ Specify other run parameters
 
 
 + Submit the workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
@@ -76,6 +78,9 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 ![workflow diagram](bin/DAGs/one_sample_DAG_default_workflow.png)
 
 ## Full workflow - 1 samples
+
+If the default workflow is run, additional rules can easily be run by turning the optional rules on in bin/config.yaml
+
 ![workflow diagram](bin/DAGs/one_sample_DAG_full_workflow.png)
 
 ## Default workflow - 5 samples
