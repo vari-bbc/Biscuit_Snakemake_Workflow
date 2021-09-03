@@ -57,7 +57,8 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 	+ Biscuit index
 	+ Biscuit QC assets (https://github.com/huishenlab/biscuit/releases/tag/v0.3.16.20200420)
 	+ Environmental modules (If modules are not available, snakemake gives a warning but will run successfully *as long as the required executables are in the path*)
-	+ Turn on any optional workflow components
+	+ Toggle optional workflow components
+	+ Specify other run parameters
 
 
 + Submit the workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
