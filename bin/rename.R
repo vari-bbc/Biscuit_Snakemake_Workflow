@@ -2,7 +2,6 @@ log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")
 
-.libPaths("/primary/vari/software/BBC/R/build-3.6.0/lib64/R/library")
 library(tidyverse)
 units <- read_tsv("bin/samples.tsv")
 samp = snakemake@output[[1]] %>% gsub("raw_data/","",.) %>% gsub("(-.{2}).fastq.gz","",.)
