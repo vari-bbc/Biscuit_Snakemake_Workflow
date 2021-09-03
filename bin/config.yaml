@@ -18,11 +18,11 @@ control_vectors: 0 # If config["control_vectors"], then the bed files for the co
 
 
 
-run_fastq_screen: 0 # run fastq_screen with --bisulfite mode
+run_fastq_screen: 1 # run fastq_screen with --bisulfite mode
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
 generate_snps: 0
-epiread: 0
+epiread: 1
 
 sam_header: #
    PL: il
