@@ -19,19 +19,20 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 
 # Dependencies
 
-BISCUIT
-R with packages tidyverse, patchwork, and viridis.
-SAMTools
-Snakemake 1.6.0 
-samblaster
-htslib
-bedtools
-pigz
-parallel
-bismark (only required if running fastq_screen)
-fastq_screen (only required if running fastq_screen)
-multiQC
-parallel
+ + BISCUIT
+ + R with packages tidyverse, patchwork, and viridis (only required for plotting methylation controls)
+ + SAMTools 
+ + Snakemake 1.6.0 
+ + samblaster
+ + htslib
+ + bedtools
+ + pigz
+ + parallel
+ + bismark (only required if running fastq_screen)
+ + fastq_screen (only required if running fastq_screen)
+ + fastQC
+ + multiQC
+ + parallel
 
 
 # Running the workflow
@@ -76,6 +77,9 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 ![workflow diagram](bin/DAGs/one_sample_DAG_default_workflow.png)
 
 ## Full workflow - 1 samples
+
+If the default workflow is run, additional rules can easily be run by turning the optional rules on in bin/config.yaml
+
 ![workflow diagram](bin/DAGs/one_sample_DAG_full_workflow.png)
 
 ## Default workflow - 5 samples
