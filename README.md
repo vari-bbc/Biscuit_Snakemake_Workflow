@@ -15,7 +15,24 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 	7. [default off] fastq_screen (using Bismark - https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/
 	8. [default off] QC methylated and unmethylated controls
 
-Many options can be easily specified in the config.yaml!
+Many options can be easily specified in the config.yaml! Otherwise, the commands in the Snakefile can also be modified to meet different needs.
+
+# Dependencies
+
+BISCUIT
+R with packages tidyverse, patchwork, and viridis.
+SAMTools
+Snakemake 1.6.0 
+samblaster
+htslib
+bedtools
+pigz
+parallel
+bismark (only required if running fastq_screen)
+fastq_screen (only required if running fastq_screen)
+multiQC
+parallel
+
 
 # Running the workflow
 
