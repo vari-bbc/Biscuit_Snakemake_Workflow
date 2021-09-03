@@ -51,6 +51,7 @@ rule all:
         expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
         # snps
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
+        expand("analysis/trim_reads/{samples.sample}-R1_val_1.fq.gz", samples=samples.itertuples())
         
 rule rename_fastq:
     output:
@@ -124,7 +125,7 @@ rule trim_galore:
     params:
         outdir = "analysis/trim_reads/",
         quality = config["trim_galore"]["q"],
-        hard_trim_R2 = config["hard_trim_R2"],
+        hard_trim_R2 = config["trim_galore"]["hard_trim_R2"],
     envmodules:
         config["envmodules"]["trim_galore"],
         config["envmodules"]["fastqc"],
@@ -134,7 +135,7 @@ rule trim_galore:
         mem_gb=80
     shell:
         """
-        if [ {params.hard_trim_R2} > 0 ]; then
+        if [ {params.hard_trim_R2} -ge 1 ]; then
             trim_galore \
             --paired \
             {input} \

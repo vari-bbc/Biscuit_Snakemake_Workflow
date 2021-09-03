@@ -1,30 +1,28 @@
 ref:
-  #~ fasta: /home/ian.beddows/UBC_Mike_SHEH_20210623_WGBS/dev2/WGBS_Biscuit_Snakemake/test.fa.gz
-  #~ fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
   fasta: hg38_gencode.fa.gz
-  index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
-  assets: /home/ian.beddows/canary/GRCh38_EMseq/hg38/ # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
+  index: hg38_gencode.fa.gz # this does not need to be different from config["ref"]["fasta"], but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
+  assets: <path_to_assets> # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
 trim_galore:
    q: 30 #  Trim low-quality ends from reads in addition to adapter removal.
+   hard_trim_R2: 0 # --clip_R2 <int> argument from trim_galore. For swift kit, set this to 14 or 15
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
 
-build_ref_with_methylation_controls: 1 # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
+build_ref_with_methylation_controls: 0 # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
 # This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors included in bin/.
 
-control_vectors: 1 # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
+control_vectors: 0 # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
-hard_trim_R2: 1 # --clip_R2 <int> argument from trim_galore
-# for swift kit, set this to 14 or 15
 
-run_fastq_screen: 1 # run fastq_screen with --bisulfite mode
+
+run_fastq_screen: 0 # run fastq_screen with --bisulfite mode
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
-generate_snps: 1
-epiread: 1
+generate_snps: 0
+epiread: 0
 
 sam_header: #
    PL: il
