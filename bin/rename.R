@@ -1,27 +1,29 @@
-log <- file(snakemake@log[[1]], open="wt")
-sink(log)
-sink(log, type="message")
+#log <- file(snakemake@log[[1]], open="wt")
+#sink(log)
+#sink(log, type="message")
 
 library(tidyverse)
 units <- read_tsv("bin/samples.tsv")
-samp = snakemake@output[[1]] %>% gsub("raw_data/","",.) %>% gsub("(-.{2}).fastq.gz","",.)
 
-print(paste("merging PE reads for:", samp))
-  if (file.exists(toString(paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq1)))){
-    system(paste0("ln -sr ",
-                gsub(toString(paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq1)),pattern=",", replacement = ""),
-                " raw_data/", samp, "-R1.fastq.gz"))
-    print("R1 units merged")
+for(samp in units$sample){
+  print(paste("Renaming PE reads for:", samp))
+  file_1 <- paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq1)
+  if (file.exists(file_1)){
+    system(
+      paste0("ln -sr ",toString(paste0("raw_data/",file_1))," raw_data/", samp, "-R1.fastq.gz")
+    )
+    print("R1 fq2 renamed")
   } else {
-    stop(paste("Error in mergeLanesAndRename.R: fq1 file for", samp, "listed in bin/samples.tsv not present in raw_reads/."))
+    stop(paste("Error in mergeLanesAndRename.R: fq1 file for", samp,'(',file_1,')', "listed in bin/samples.tsv not present in raw_reads/."))
   }
   # merge R2 reads
-  if (file.exists(toString(paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq2)))){
-    system(paste0("ln -sr ",
-                gsub(toString(paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq2)),pattern=",", replacement = ""),
-                " raw_data/", samp, "-R2.fastq.gz"))
-    print("R2 units merged")
-    save.image(file=paste0("logs/rename/rename-",samp,".RData"))
+  file_2 <- paste0("raw_data/",(units %>% dplyr::filter(sample==samp))$fq2)
+  if (file.exists(file_1)){
+    system(
+      paste0("ln -sr ",toString(paste0("raw_data/",file_1))," raw_data/", samp, "-R2.fastq.gz")
+    )
+    print("R2 fq2 renamed")
   } else {
-    stop(paste("Error in mergeLanesAndRename.R: fq2 file for", samp, "listed in bin/samples.tsv not present in raw_reads/."))
+    stop(paste("Error in mergeLanesAndRename.R: fq2 file for", samp,'(',file_2,')', "listed in bin/samples.tsv not present in raw_reads/."))
   }
+}
