@@ -93,6 +93,7 @@ if config["build_ref_with_methylation_controls"]:
         shell:
             """
             mkdir -p {output.newrefdir}
+            # should use gzip, NOT bgzip!
             cat bin/puc19.fa.gz bin/lambda.fa.gz {input} > {output.ref}
             biscuit index {output.ref}
             samtools faidx {output.ref}

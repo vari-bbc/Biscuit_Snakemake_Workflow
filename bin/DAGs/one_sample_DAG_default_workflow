@@ -6,8 +6,8 @@ digraph snakemake_dag {
 	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
 	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
 	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "trim_galore", color = "0 0 0", style="rounded,dashed"];
-	5[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded,dashed"];
+	4[label = "trim_galore", color = "0 0 0", style="rounded"];
+	5[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
 	6[label = "multiQC", color = "0 0 0", style="rounded"];
 	7[label = "biscuit_qc", color = "#FF0000", style="rounded"];
 	1 -> 0

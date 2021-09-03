@@ -1,21 +1,21 @@
 digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
-    edge[penwidth=2, color=grey];
+    edge[penwidth=5, color=grey];
 	0[label = "all", color = "0 0 0", style="rounded"];
 	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
 	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
 	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "build_ref_with_methylation_controls", color = "0 0 0", style="rounded"];
+	4[label = "build_ref_with_methylation_controls", color = "0 0 0", style="rounded,dashed"];
 	5[label = "trim_galore", color = "0 0 0", style="rounded"];
 	6[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
 	7[label = "multiQC", color = "0 0 0", style="rounded"];
-	8[label = "fastq_screen", color = "0 0 0", style="rounded"];
+	8[label = "fastq_screen", color = "0 0 0", style="rounded,dashed"];
 	9[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	10[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	11[label = "methylation_controls_figure", color = "0 0 0", style="rounded"];
-	12[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	13[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
+	10[label = "methylation_controls_qc", color = "0 0 0", style="rounded,dashed"];
+	11[label = "methylation_controls_figure", color = "0 0 0", style="rounded,dashed"];
+	12[label = "biscuit_snps", color = "#FF0000", style="rounded,dashed"];
+	13[label = "biscuit_epiread", color = "#FF0000", style="rounded,dashed"];
 	1 -> 0
 	7 -> 0
 	10 -> 0

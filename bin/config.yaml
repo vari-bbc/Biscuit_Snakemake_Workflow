@@ -6,16 +6,16 @@ ref:
   assets: /home/ian.beddows/canary/GRCh38_EMseq/hg38/ # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
 trim_galore:
-   q: 30 #  Trim low-quality ends from reads in addition to adapter removal. Default phred score is 20
+   q: 30 #  Trim low-quality ends from reads in addition to adapter removal.
 biscuit:
    lib_type: 0 # biscuit -b option (for strandedness)
 
 build_ref_with_methylation_controls: 1 # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
-# This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors.
+# This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors included in bin/.
 
 control_vectors: 1 # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
-# Only useful IF the ref genome included the control vectors with fasta headers ^J02459.1 (lamdba / unmethylated control) and ^M77789.2 (puc19 / methylated control). 
-# The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["append_control_vectors"].
+# Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
+# The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
 hard_trim_R2: 1 # --clip_R2 <int> argument from trim_galore
 # for swift kit, set this to 14 or 15
@@ -36,7 +36,7 @@ sam_header: #
 # executables are in your path, then 
 envmodules: 
    samtools: bbc/samtools/samtools-1.9 # "module load <string>" should work on your command line, e.g. "module load samtools/samtools-1.9"
-   R: bbc/R/R-3.6.0 # 
+   R: bbc/R/R-4.1.0 # 
    snakemake: bbc/snakemake/snakemake-5.28.0
    trim_galore: bbc/trim_galore/trim_galore-0.6.0
    #~ biscuit: bbc/biscuit/biscuit_0_3_16
