@@ -533,7 +533,7 @@ if config["epiread"]:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
            """
-           biscuit epiread -B {input.snps} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+           biscuit epiread -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
            bgzip {params.epibed}
            tabix -p bed {output.epibed_gz}
            """
