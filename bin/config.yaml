@@ -19,7 +19,11 @@ control_vectors: FALSE # If config["control_vectors"], then the bed files for th
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
+
 run_fastq_screen: FALSE # run fastq_screen with --bisulfite mode
+is_nome: FALSE # If data is NOMe-seq data, set to 1
+
+run_fastq_screen: 0 # run fastq_screen with --bisulfite mode
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
 generate_snps: FALSE
