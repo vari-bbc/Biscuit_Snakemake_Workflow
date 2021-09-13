@@ -490,34 +490,38 @@ if config["generate_snps"] or config["epiread"]:
            vcf_gz = "analysis/pileup/{sample}.vcf.gz",
            bam="analysis/align/{sample}.sorted.markdup.bam",
         output:
-           snp_bed = "analysis/snps/{sample}.snp.bed"
+           snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz",
+           snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         envmodules:
            config["envmodules"]["biscuit"],
         benchmark:
             "benchmarks/biscuit_snps/{sample}.txt"        
         params:
            reference = newRef,
+           snp_bed = "analysis/snps/{sample}.snp.bed"
         resources:
            mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
         log:
            epiread = "logs/snps/snps.{sample}.log",
         shell:
            """
-           biscuit vcf2bed -t snp {input.vcf_gz} > {output.snp_bed}
+           biscuit vcf2bed -t snp {input.vcf_gz} > {params.snp_bed}
+           bgzip {params.snp_bed}
+           tabix -p bed {output.snp_bed_gz}
            """
 
 if config["epiread"]:
     rule biscuit_epiread:
         input: 
             bam = "analysis/align/{sample}.sorted.markdup.bam",
-            snps = "analysis/snps/{sample}.snp.bed",
+            snps = "analysis/snps/{sample}.snp.bed.gz",
+            snps_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi",
         envmodules:
            config["envmodules"]["biscuit"],
            config["envmodules"]["htslib"],
         params:
             reference = newRef,
-            epibed = "analysis/epiread/{sample}.epibed",
-            snp_bed = "analysis/snps/{sample}.snp.bed"
+            epibed = "analysis/epiread/{sample}.epibed"
         benchmark:
             "benchmarks/biscuit_epiread/{sample}.txt"    
         resources:
@@ -525,8 +529,6 @@ if config["epiread"]:
         output:
             epibed_gz = "analysis/epiread/{sample}.epibed.gz",
             epibed_gz_tbi = "analysis/epiread/{sample}.epibed.gz.tbi",
-            snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz",
-            snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         log:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
@@ -534,16 +536,4 @@ if config["epiread"]:
            biscuit epiread -B {input.snps} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
            bgzip {params.epibed}
            tabix -p bed {output.epibed_gz}
-           bgzip {params.snp_bed}
-           tabix -p bed {output.snp_bed_gz}
            """
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
