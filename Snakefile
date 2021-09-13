@@ -22,27 +22,27 @@ rule all:
         # biscuit
         expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
         # mergecg
-        # ~ expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
-        # ~ expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
-        # ~ # multiQC
-        # ~ "analysis/multiqc/multiqc_report.html",
-        # ~ # rule for checking that data is not trimmed
-        # ~ # rules for quality control vectors
-        # ~ expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        # ~ expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        # ~ "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
-        # ~ # rules for fastq_screen
-        # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
+        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
+        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
+        # multiQC
+        "analysis/multiqc/multiqc_report.html",
+        # rule for checking that data is not trimmed
+        # rules for quality control vectors
+        expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
+        # rules for fastq_screen
+        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
-        # ~ # output of rule build_ref_with_methylation_controls
-        # ~ expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
+        # output of rule build_ref_with_methylation_controls
+        expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
         
-        # ~ # epiread
-        # ~ expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
-        # ~ expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
-        # ~ # snps
-        # ~ expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
-        # ~ expand("analysis/trim_reads/{samples.sample}-R1_val_1.fq.gz", samples=samples.itertuples())
+        # epiread
+        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        # snps
+        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
+        
                
 rule rename_fastq:
     output:
@@ -397,7 +397,7 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        if [ {params.nome} -eq 1 ]; then
+        if [ {params.nome} eq "TRUE" ]; then
             biscuit pileup -N -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
         else
             biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
@@ -500,7 +500,7 @@ rule biscuit_qc:
         2> {log}
         """
 
-def get_multiQC_input(wildcards):
+def get_multiQC_params(wildcards):
     if config["run_fastq_screen"] and config["trim_galore"]["trim_before_BISCUIT"]:
         input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen"
         return input
@@ -520,8 +520,8 @@ rule multiQC:
         expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         # trim_galore
-        expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()),
-        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()),
+        expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
         # biscuit_qc
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_botgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_table.txt", samples=samples.itertuples()),
@@ -537,7 +537,7 @@ rule multiQC:
         expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_cpg_topgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_cv_table.txt", samples=samples.itertuples()),
     params:
-        get_multiQC_input
+        get_multiQC_params
     output:
         directory("analysis/multiqc/multiqc_report_data",),
         "analysis/multiqc/multiqc_report.html",
