@@ -268,6 +268,7 @@ rule biscuit_pileup:
         ref=newRef,
         vcf="analysis/pileup/{sample}.vcf",
         bed="analysis/pileup/{sample}.bed",
+        nome=config["is_nome"]
     output:
         vcf_gz="analysis/pileup/{sample}.vcf.gz",
         vcf_tabix="analysis/pileup/{sample}.vcf.gz.tbi",
@@ -294,7 +295,11 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        if [ {params.nome} -eq 1 ]; then
+            biscuit pileup -N -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        else
+            biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        fi
         bgzip {params.vcf} 2> {log.vcf_gz}
         tabix -p vcf {output.vcf_gz} 2> {log.vcf_tbi}
 
@@ -309,6 +314,7 @@ rule biscuit_mergecg:
     params:
         ref=newRef,
         mergecg="analysis/pileup/{sample}_mergecg.bed",
+        nome=config["is_nome"]
     output:
         mergecg_gz="analysis/pileup/{sample}_mergecg.bed.gz",
         mergecg_tbi="analysis/pileup/{sample}_mergecg.bed.gz.tbi",
@@ -328,7 +334,11 @@ rule biscuit_mergecg:
         config["envmodules"]["htslib"],
     shell:
         """
-        biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        if [ {params.nome} -eq 1 ]; then
+            biscuit mergecg -N {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        else
+            biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        fi
         bgzip {params.mergecg} 2> {log.mergecg_gz}
         tabix -p bed {output.mergecg_gz} 2> {log.mergecg_tbi}
         """
@@ -521,7 +531,8 @@ if config["epiread"]:
            config["envmodules"]["htslib"],
         params:
             reference = newRef,
-            epibed = "analysis/epiread/{sample}.epibed"
+            epibed = "analysis/epiread/{sample}.epibed",
+            nome=config["is_nome"]
         benchmark:
             "benchmarks/biscuit_epiread/{sample}.txt"    
         resources:
@@ -533,7 +544,19 @@ if config["epiread"]:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
            """
-           biscuit epiread -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+           if [[ "$(zcat {input.snps} | head -n 1 | wc -l)" == "1" ]]; then
+               if [ {params.nome} -eq 1 ]; then
+                   biscuit epiread -N -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               else
+                   biscuit epiread -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               fi
+           else
+               if [ {params.nome} -eq 1 ]; then
+                   biscuit epiread -N {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               else
+                   biscuit epiread {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               fi
+           fi
            bgzip {params.epibed}
            tabix -p bed {output.epibed_gz}
            """
