@@ -10,53 +10,44 @@ min_version("5.20.1")
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
 biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa","fai"]
+wildcard_constraints:
+   seqfile_index = '\d+'
 
 rule all:
     input:
-        # rename
-        # expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
-        # trim_galore
-        # expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()),
-        # expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()),
+        # TEST RULE
+        # ~ expand("{samples.sample}.test", samples=samples.itertuples()),
+        # rename_fastq
+        # ~ expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
         # biscuit
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam.bai", samples=samples.itertuples()),
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam.flagstat", samples=samples.itertuples()),
-        # biscuit_pileup
-        # expand("analysis/pileup/{samples.sample}.vcf.gz", samples=samples.itertuples()),
-        # expand("analysis/pileup/{samples.sample}.bed.gz", samples=samples.itertuples()),
-        # expand("analysis/pileup/{samples.sample}.bed.gz.tbi", samples=samples.itertuples()),
+        expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
         # mergecg
-        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
-        expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
-        # mergecg_combined
-        # "analysis/pileup/combined_mergecg.bed.gz",
-        # "analysis/pileup/combined_mergecg.bed.gz.tbi",
-        # biscuit_qc
-        # multiQC
-        "analysis/multiqc/multiqc_report.html",
-        # rule for checking that data is not trimmed
-        # rules for quality control vectors
-        expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
-        "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
-        # rules for fastq_screen
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
+        # ~ expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
+        # ~ expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
+        # ~ # multiQC
+        # ~ "analysis/multiqc/multiqc_report.html",
+        # ~ # rule for checking that data is not trimmed
+        # ~ # rules for quality control vectors
+        # ~ expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        # ~ expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
+        # ~ "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
+        # ~ # rules for fastq_screen
+        # ~ expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
-        # output of rule build_ref_with_methylation_controls
-        expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
+        # ~ # output of rule build_ref_with_methylation_controls
+        # ~ expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
         
-        # epiread
-        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
-        expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
-        # snps
-        expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
-        expand("analysis/trim_reads/{samples.sample}-R1_val_1.fq.gz", samples=samples.itertuples())
-        
+        # ~ # epiread
+        # ~ expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        # ~ expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
+        # ~ # snps
+        # ~ expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
+        # ~ expand("analysis/trim_reads/{samples.sample}-R1_val_1.fq.gz", samples=samples.itertuples())
+               
 rule rename_fastq:
     output:
-        "raw_data/{sample}-R1.fastq.gz",
-        "raw_data/{sample}-R2.fastq.gz",
+        "raw_data/{sample}-1-R1.fastq.gz", # only require 1 file / sample
+        "raw_data/{sample}-1-R2.fastq.gz",
     log:
         "logs/rename/rename_{sample}.log"
     threads: 1
@@ -104,19 +95,33 @@ else:
     newIndex = config["ref"]["index"], 
 
 
+def get_trim_galore_index(wildcards): # this is for getting files when there is more than 1 R1 and R2
+    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+    return list(FILE_INDEX)
+    
+def get_trim_galore_input(wildcards):
+    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
+    files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
+    return files
+    # ~ return FILE_INDEX
+
 rule trim_galore:
     input:
-        "raw_data/{sample}-R1.fastq.gz",
-        "raw_data/{sample}-R2.fastq.gz"
+        get_trim_galore_input
     output:
-        "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
-        "analysis/trim_reads/{sample}-R1_val_1_fastqc.html",
-        "analysis/trim_reads/{sample}-R1_val_1_fastqc.zip",
-        "analysis/trim_reads/{sample}-R1.fastq.gz_trimming_report.txt",
-        "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
-        "analysis/trim_reads/{sample}-R2_val_2_fastqc.html",
-        "analysis/trim_reads/{sample}-R2_val_2_fastqc.zip",
-        "analysis/trim_reads/{sample}-R2.fastq.gz_trimming_report.txt"
+        # ~ get_trim_galore_output,
+        # ~ expand("analysis/trim_reads/{sample}-{index}-R1_val_1.fq.gz", index = get_trim_galore_index, sample = {sample})
+        # ~ expand("0_fastq/{{runid}}_S0_L001_{readid}_001.fastq.gz", readid=config['readids'])
+        # ~ expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=get_trim_galore_index),
+        expand("analysis/trim_reads/{{sample}}-{index}-R{read}_val_{read}.fq.gz", index=[1,2], read=[1,2]),
+        # ~ "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz",
+        "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
+        "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
+        "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
+        # ~ "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz",
+        "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
+        "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
+        "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
     log:
         stdout="logs/trim_reads/{sample}.o",
         stderr="logs/trim_reads/{sample}.e"
@@ -124,7 +129,7 @@ rule trim_galore:
         "benchmarks/trim_reads/{sample}.txt"
     params:
         outdir = "analysis/trim_reads/",
-        quality = config["trim_galore"]["q"],
+        quality = config["trim_galore"]["quality"],
         hard_trim_R2 = config["trim_galore"]["hard_trim_R2"],
     envmodules:
         config["envmodules"]["trim_galore"],
@@ -184,7 +189,8 @@ if config["run_fastq_screen"]:
             """
             fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log.fastq_screen}
             """
-def get_biscuit_align_input(wildcards):
+
+def get_biscuit_align_reference(wildcards):
     if config["build_ref_with_methylation_controls"]:
         input = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
         return input
@@ -192,20 +198,78 @@ def get_biscuit_align_input(wildcards):
         input = config["ref"]["fasta"] # else just require default reference
         return input
 
+def get_rename_fastq_output_R1(wildcards):
+    if config["trim_galore"]["trim_before_BISCUIT"]:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R1_val_1.fq.gz", seqfile_index = FILE_INDEX))
+        return files   
+    else:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R1.fastq.gz", seqfile_index = FILE_INDEX))
+        return files
+        
+def get_rename_fastq_output_R2(wildcards):
+    if config["trim_galore"]["trim_before_BISCUIT"]:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
+        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R2_val_2.fq.gz", seqfile_index = FILE_INDEX))
+        return files
+    else:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
+        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
+        return files
+           
+rule test_rule:
+    input:
+       reference = get_biscuit_align_reference,
+       # ~ R1 = expand("analysis/trim_reads/{sample}-R{read}_val_{read}.fq.gz", read=[1,2], sample={sample}) if config["trim_galore"]["trim_before_BISCUIT"] else []
+       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else R1 = list("raw_data/" + samples['fq2']),
+       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq1'])],
+       # ~ R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq2'])]
+       # ~ R1 = "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R1.fastq.gz"],
+       # ~ R2 = "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R2.fastq.gz"],
+       # ~ R1 = get_rename_fastq_output_R1,
+       # ~ R2 = get_rename_fastq_output_R2
+       trimFiles = get_trim_galore_input
+    envmodules:
+       config["envmodules"]["samtools"],
+       config["envmodules"]["htslib"],
+    output:
+       test_output = "{sample}.test"
+    params:
+        biscuit_version = config["biscuit"]["biscuit_blaster_version"],
+        trim_index = get_trim_galore_index,
+
+        trim_output = expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=[1,2]),
+    resources:
+        mem_gb=32
+    shell:
+       """
+       echo {input.reference} > {output.test_output}
+       echo {samples.fq1}
+       echo "get_trim_galore_input"
+       echo {input.trimFiles}
+       echo "get_trim_galore_index"
+       echo {params.trim_index}
+       echo "get_trim_galore_o"
+       echo {params.trim_output}
+       echo {params.biscuit_version}
+       """
+
+
+
 rule biscuit_align:
     input:
-        get_biscuit_align_input,
-        R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
-        R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
-        
+        reference = get_biscuit_align_reference,
+        R1 = get_rename_fastq_output_R1,
+        R2 = get_rename_fastq_output_R2
     output:
         bam = "analysis/align/{sample}.sorted.markdup.bam",
         bai = "analysis/align/{sample}.sorted.markdup.bam.bai",
-        disc = "analysis/align/{sample}.disc.sorted.bam",
-        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai",
-        split = "analysis/align/{sample}.split.sorted.bam",
-        split_bai = "analysis/align/{sample}.split.sorted.bam.bai",
-        unmapped = "analysis/align/{sample}.unmapped.fastq.gz",
+        disc = "analysis/align/{sample}.disc.sorted.bam" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.disc"],
+        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.disc.bai"],
+        split = "analysis/align/{sample}.split.sorted.bam" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.split"],
+        split_bai = "analysis/align/{sample}.split.sorted.bam.bai" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.split.bai"],
+        unmapped = "analysis/align/{sample}.unmapped.fastq.gz" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.unmapped"],
         flagstat = "analysis/align/{sample}.sorted.markdup.bam.flagstat",
     params:
         # don't include the .fa/.fasta suffix for the reference biscuit idx.
@@ -219,8 +283,10 @@ rule biscuit_align:
         disc = "analysis/align/{sample}.disc.sam",
         split = "analysis/align/{sample}.split.sam",
         unmapped = "analysis/align/{sample}.unmapped.fastq",
+        biscuit_version = config["biscuit"]["biscuit_blaster_version"]
     log:
         biscuit = "logs/biscuit/biscuit_align.{sample}.log",
+        biscuit_blaster_version = "logs/biscuit/blaster_version.{sample}.log",
         samblaster = "logs/biscuit/samblaster.{sample}.log",
         samtools_view = "logs/biscuit/samtools_view.{sample}.log",
         samtools_sort = "logs/biscuit/samtools_sort.{sample}.log",
@@ -244,22 +310,58 @@ rule biscuit_align:
         config["envmodules"]["htslib"],
     shell:
         """
-        biscuit align -@     {threads} -b {params.lib_type} \
-        -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
-        {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
-        samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
-        samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
-        samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
-        samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
-        samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
-        samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
-        samtools index -@ {threads} {output.disc} 2> {log.index_disc}
-        samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
-        samtools index -@ {threads} {output.split} 2> {log.index_split}
-        bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
-        rm {params.disc}
-        rm {params.split}
+        if [ {params.biscuit_version} == "v2" ]; then
+            echo "biscuit blaster v2" 2> {log.biscuit_blaster_version}
+            biscuit align -@ {threads} -b {params.lib_type} \
+            -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
+            {params.ref} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
+            samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+            samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
+            samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
+            samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
+            samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
+            samtools index -@ {threads} {output.disc} 2> {log.index_disc}
+            samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
+            samtools index -@ {threads} {output.split} 2> {log.index_split}
+            bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
+            rm {params.disc}
+            rm {params.split}
+        elif [ {params.biscuit_version} == "v1" ]; then
+            echo "biscuit blaster v1" 2> {log.biscuit_blaster_version}
+            biscuit align -@ {threads} -b {params.lib_type} \
+            -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
+            {params.ref} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
+            samblaster -r --addMateTags 2> {log.samblaster} | \
+            samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
+            samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
+            samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
+            touch {output.disc}
+            touch {output.disc_bai}
+            touch {output.split}
+            touch {output.split_bai}
+            touch {output.unmapped}
+        else
+            echo "biscuit: biscuit_blaster_version must be v1 or v2 in bin/config.yaml" 2> {log.biscuit_blaster_version}
+        fi
         """
+        
+        # ~ biscuit align -@ {threads} -b {params.lib_type} \
+        # ~ -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
+        # ~ {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
+        # ~ samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+        # ~ samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
+        # ~ samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+        # ~ samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
+        # ~ samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
+        # ~ samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
+        # ~ samtools index -@ {threads} {output.disc} 2> {log.index_disc}
+        # ~ samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
+        # ~ samtools index -@ {threads} {output.split} 2> {log.index_split}
+        # ~ bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
+        # ~ rm {params.disc}
+        # ~ rm {params.split}
 
 rule biscuit_pileup:
     input:
@@ -389,11 +491,17 @@ rule biscuit_qc:
         """
 
 def get_multiQC_input(wildcards):
-    if config["run_fastq_screen"]:
+    if config["run_fastq_screen"] and config["trim_galore"]["trim_before_BISCUIT"]:
         input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen"
         return input
+    elif config["run_fastq_screen"]:
+        input = "raw_data/ analysis/BISCUITqc/ analysis/fastq_screen"
+        return input
+    elif config["trim_galore"]["trim_before_BISCUIT"]:
+        input = "raw_data/ analysis/BISCUITqc/ analysis/trim_reads/"
+        return input
     else:
-        input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/"
+        input = "raw_data/ analysis/BISCUITqc/"
         return input
         
 rule multiQC:
