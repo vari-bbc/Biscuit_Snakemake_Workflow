@@ -15,15 +15,14 @@ biscuit:
 build_ref_with_methylation_controls: FALSE # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
 # This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors included in bin/.
 
-control_vectors: FALSE # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
+control_vectors: TRUE # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
-run_fastq_screen: FALSE # run fastq_screen with --bisulfite mode
+run_fastq_screen: TRUE # run fastq_screen with --bisulfite mode
 
 is_nome: FALSE # If data is NOMe-seq data, set to 1
 
-run_fastq_screen: 0 # run fastq_screen with --bisulfite mode
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
 generate_snps: FALSE
@@ -33,7 +32,6 @@ sam_header: #
    PL: il
    PU: nv
    LB: b1
-  
   
 # If your system does not use environemntal modules, then the executables for all of the modules must be in your path. If all dependency
 # executables are in your path, then 
