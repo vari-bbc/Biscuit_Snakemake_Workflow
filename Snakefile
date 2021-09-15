@@ -18,7 +18,7 @@ rule all:
         # TEST RULE
         # ~ expand("{samples.sample}.test", samples=samples.itertuples()),
         # rename_fastq
-        # ~ expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
+        expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
         # biscuit
         expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
         # mergecg
@@ -27,12 +27,14 @@ rule all:
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
+        
         # rules for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
+        
         # rules for fastq_screen
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
         # output of rule build_ref_with_methylation_controls
         expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
@@ -42,7 +44,6 @@ rule all:
         expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
         # snps
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
-        
                
 rule rename_fastq:
     output:
@@ -102,8 +103,8 @@ def get_trim_galore_index(wildcards): # this is for getting files when there is 
 def get_trim_galore_input(wildcards):
     FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
     files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
-    return files
-    # ~ return FILE_INDEX
+    return FILE_INDEX
+    # ~ return files
 
 rule trim_galore:
     input:
@@ -113,22 +114,23 @@ rule trim_galore:
         # ~ expand("analysis/trim_reads/{sample}-{index}-R1_val_1.fq.gz", index = get_trim_galore_index, sample = {sample})
         # ~ expand("0_fastq/{{runid}}_S0_L001_{readid}_001.fastq.gz", readid=config['readids'])
         # ~ expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=get_trim_galore_index),
-        expand("analysis/trim_reads/{{sample}}-{index}-R{read}_val_{read}.fq.gz", index=[1,2], read=[1,2]),
+        # ~ expand("analysis/trim_reads/{{sample}}-{index}-R{read}_val_{read}.fq.gz", index=[1,2], read=[1,2]),
+        directory("analysis/trim_reads/{sample}/")
         # ~ "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz",
-        "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
-        "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
-        "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
+        # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
+        # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
+        # ~ "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
         # ~ "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz",
-        "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
-        "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
-        "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
+        # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
+        # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
+        # ~ "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
     log:
         stdout="logs/trim_reads/{sample}.o",
         stderr="logs/trim_reads/{sample}.e"
     benchmark:
         "benchmarks/trim_reads/{sample}.txt"
     params:
-        outdir = "analysis/trim_reads/",
+        outdir = "analysis/trim_reads/{sample}/",
         quality = config["trim_galore"]["quality"],
         hard_trim_R2 = config["trim_galore"]["hard_trim_R2"],
     envmodules:
@@ -137,9 +139,10 @@ rule trim_galore:
         config["envmodules"]["pigz"],
     threads: config["hpcParameters"]["trimThreads"]
     resources:
-        mem_gb=80
+        mem_gb=config["hpcParameters"]["smallMemoryGb"]
     shell:
         """
+        echo {input}
         if [ {params.hard_trim_R2} -ge 1 ]; then
             trim_galore \
             --paired \
@@ -165,13 +168,13 @@ rule trim_galore:
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            read1 = "raw_data/{sample}-R1.fastq.gz",
-            read2 = "raw_data/{sample}-R2.fastq.gz",
+            read1 = "raw_data/{sample}-1-R1.fastq.gz", # ***only the first if there are multiple files***
+            read2 = "raw_data/{sample}-1-R2.fastq.gz",
         output:
-            "analysis/fastq_screen/{sample}-R1_screen.html",
-            "analysis/fastq_screen/{sample}-R2_screen.html",
-            "analysis/fastq_screen/{sample}-R1_screen.txt",
-            "analysis/fastq_screen/{sample}-R2_screen.txt",
+            "analysis/fastq_screen/{sample}-1-R1_screen.html",
+            "analysis/fastq_screen/{sample}-1-R2_screen.html",
+            "analysis/fastq_screen/{sample}-1-R1_screen.txt",
+            "analysis/fastq_screen/{sample}-1-R2_screen.txt",
         log:
             fastq_screen = "logs/fastq_screen/{sample}.log",
         params:
@@ -254,8 +257,6 @@ rule test_rule:
        echo {params.trim_output}
        echo {params.biscuit_version}
        """
-
-
 
 rule biscuit_align:
     input:
@@ -347,22 +348,6 @@ rule biscuit_align:
         fi
         """
         
-        # ~ biscuit align -@ {threads} -b {params.lib_type} \
-        # ~ -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
-        # ~ {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
-        # ~ samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
-        # ~ samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
-        # ~ samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
-        # ~ samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
-        # ~ samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
-        # ~ samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
-        # ~ samtools index -@ {threads} {output.disc} 2> {log.index_disc}
-        # ~ samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
-        # ~ samtools index -@ {threads} {output.split} 2> {log.index_split}
-        # ~ bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
-        # ~ rm {params.disc}
-        # ~ rm {params.split}
-
 rule biscuit_pileup:
     input:
         bam="analysis/align/{sample}.sorted.markdup.bam",
@@ -517,11 +502,11 @@ def get_multiQC_params(wildcards):
 rule multiQC:
     input:
         # fastq_screen
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         # trim_galore
-        expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
-        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        expand("analysis/trim_reads/{samples.sample}-1-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        expand("analysis/trim_reads/{samples.sample}-1-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
         # biscuit_qc
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_botgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_table.txt", samples=samples.itertuples()),

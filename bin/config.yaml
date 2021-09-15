@@ -4,9 +4,9 @@ ref:
   assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
 trim_galore:
-   trim_before_BISCUIT: FALSE # 
+   trim_before_BISCUIT: FALSE # CURRENTLY NOT WORKING - DO NOT TURN ON! 
    quality: 30 #  Trim low-quality ends from reads in addition to adapter removal.
-   hard_trim_R2: 1 # --clip_R2 <int> argument from trim_galore. For swift kit, set this to 14 or 15
+   hard_trim_R2: 0 # --clip_R2 <int> argument from trim_galore. Must be integer. For swift kit, set this to 14 or 15
 
 biscuit:
    biscuit_blaster_version: v1 # specify v1 or v2
@@ -14,19 +14,20 @@ biscuit:
 
 build_ref_with_methylation_controls: FALSE # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
 # This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors included in bin/.
+# Reads will be mapped to this new reference...
 
-control_vectors: TRUE # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
+control_vectors: FALSE # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
-run_fastq_screen: TRUE # run fastq_screen with --bisulfite mode
 
-is_nome: FALSE # If data is NOMe-seq data, set to 1
+is_nome: FALSE # If data is NOMe-seq data, set to TRUE
 
+run_fastq_screen: FALSE # run fastq_screen with --bisulfite mode (uses Bismark)
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
-generate_snps: FALSE
-epiread: FALSE
+generate_snps: FALSE # do you want biscuit to call SNPs?
+epiread: FALSE # do you want to get epiread format?
 
 sam_header: #
    PL: il
@@ -34,7 +35,8 @@ sam_header: #
    LB: b1
   
 # If your system does not use environemntal modules, then the executables for all of the modules must be in your path. If all dependency
-# executables are in your path, then 
+# executables are in your path and the module is still specified (with e.g. NULL) the workflow will still run with warnings that modules could
+# not be loaded.
 envmodules: 
    samtools: bbc/samtools/samtools-1.9 # "module load <string>" should work on your command line, e.g. "module load samtools/samtools-1.9"
    R: bbc/R/R-4.1.0 # 
@@ -51,9 +53,25 @@ envmodules:
    pigz: bbc/pigz/pigz-2.4
    fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
    bismark: bbc/bismark/bismark-0.22.3
+   # if you e.g. don't have a module system
+   # then put the envmodules as follows:
+   #~ samtools: NULL
+   #~ R: NULL
+   #~ snakemake: NULL
+   #~ trim_galore: NULL
+   #~ biscuit: NULL
+   #~ htslib: NULL
+   #~ bedtools: NULL
+   #~ fastqc: NULL
+   #~ multiqc: NULL
+   #~ parrallel: NULL
+   #~ pigz: NULL
+   #~ fastq_screen: NULL
+   #~ bismark: NULL
 
 hpcParameters:
    maxThreads: 32
    maxMemoryGb: 250
    intermediateMemoryGb: 100
+   smallMemoryGb: 20
    trimThreads: 8
