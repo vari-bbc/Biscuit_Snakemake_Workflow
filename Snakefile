@@ -205,20 +205,24 @@ def get_rename_fastq_output_R1(wildcards):
     if config["trim_galore"]["trim_before_BISCUIT"]:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
         files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R1_val_1.fq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
         return files   
     else:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
         files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R1.fastq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
         return files
         
 def get_rename_fastq_output_R2(wildcards):
     if config["trim_galore"]["trim_before_BISCUIT"]:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
         files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R2_val_2.fq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
         return files
     else:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
         files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
         return files
            
 rule test_rule:
