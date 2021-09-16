@@ -6,8 +6,8 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 
 # Components of the workflow
 	0. [default off] Modify and index genome reference to including methylation controls
-	1. Trim adapters
-	2. Alignment, duplicate tagging, indexing, flagstat 
+	1. [default off] Trim adapters and/or hard clip R2
+	2. Alignment, duplicate tagging, indexing, flagstat  (biscuitBlaster v1 and v2)
 	3. Methylation information extraction (BED Format)
 	4. Merge C annd G beta values in CpG dinucleotide context
 	5. SNP and Epiread extraction
