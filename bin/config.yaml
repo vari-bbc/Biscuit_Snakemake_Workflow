@@ -80,4 +80,4 @@ hpcParameters:
 walltime:
    short: 1:00:00
    medium: 24:00:00
-   long: 72:00:00
+   long: 200:00:00

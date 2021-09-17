@@ -111,17 +111,11 @@ rule trim_galore:
     input:
         get_trim_galore_input
     output:
-        # ~ get_trim_galore_output,
-        # ~ expand("analysis/trim_reads/{sample}-{index}-R1_val_1.fq.gz", index = get_trim_galore_index, sample = {sample})
-        # ~ expand("0_fastq/{{runid}}_S0_L001_{readid}_001.fastq.gz", readid=config['readids'])
-        # ~ expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=get_trim_galore_index),
-        # ~ expand("analysis/trim_reads/{{sample}}-{index}-R{read}_val_{read}.fq.gz", index=[1,2], read=[1,2]),
-        directory("analysis/trim_reads/{sample}/")
-        # ~ "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz",
+        "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
         # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
         # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
         # ~ "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
-        # ~ "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz",
+        "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
         # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
         # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
         # ~ "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
@@ -165,6 +159,11 @@ rule trim_galore:
             --fastqc \
             2> {log.stderr} 1> {log.stdout}
         fi
+        
+        cat analysis/trim_reads/{sample}-*-R1_val_1.fq.gz > analysis/trim_reads/{sample}-R1_val_1.fq.gz # make the merged R1
+        cat analysis/trim_reads/{sample}-*-R2_val_2.fq.gz > analysis/trim_reads/{sample}-R2_val_2.fq.gz # make the merged R2
+        rm analysis/trim_reads/{sample}-*-R1_val_1.fq.gz
+        rm analysis/trim_reads/{sample}-*-R2_val_1.fq.gz
         """
 
 if config["run_fastq_screen"]:
@@ -205,9 +204,8 @@ def get_biscuit_align_reference(wildcards):
 
 def get_rename_fastq_output_R1(wildcards):
     if config["trim_galore"]["trim_before_BISCUIT"]:
-        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
-        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R1_val_1.fq.gz", seqfile_index = FILE_INDEX))
-        files.sort()
+        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-R1_val_1.fq.gz", seqfile_index = FILE_INDEX))
+        files.sort() # only getting 1 file...
         return files   
     else:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
@@ -238,7 +236,7 @@ rule test_rule:
        # ~ R2 = "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R2.fastq.gz"],
        # ~ R1 = get_rename_fastq_output_R1,
        # ~ R2 = get_rename_fastq_output_R2
-       trimFiles = get_trim_galore_input
+       trimFiles = get_rename_fastq_output_R1
     envmodules:
        config["envmodules"]["samtools"],
        config["envmodules"]["htslib"],
