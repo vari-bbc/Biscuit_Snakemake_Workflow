@@ -61,7 +61,7 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 	+ Specify other run parameters
 
 
-+ Run the first rule of Snakemake on the command line. This rule will collect the list of comma separated R1 and R2 files in bin/samples.tsv and rename them. The output of this rule is needed to get the correct R1 and R2 files for biscuit_align if trimming is turned off. This rule takes only a few seconds per sample, and allows quick debugging of missing input files.
++ Run the first rule of Snakemake on the command line. This rule will collect the list of comma separated R1 and R2 files in bin/samples.tsv and rename them. This rule needs to be run *separately first* for the correct R1 and R2 files to be passed to biscuit_align. This rule takes only a few seconds per sample, and allows quick debugging of missing input files.
 	+ `snakemake --cores 2 --use-envmodules --until get_R1_R2_files`
 + Then submit the rest workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
 
