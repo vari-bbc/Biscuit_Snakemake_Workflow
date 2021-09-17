@@ -20,7 +20,6 @@ control_vectors: FALSE # If config["control_vectors"], then the bed files for th
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
-
 is_nome: FALSE # If data is NOMe-seq data, set to TRUE
 
 run_fastq_screen: FALSE # run fastq_screen with --bisulfite mode (uses Bismark)
@@ -43,7 +42,8 @@ envmodules:
    snakemake: bbc/snakemake/snakemake-5.28.0
    trim_galore: bbc/trim_galore/trim_galore-0.6.0
    #~ biscuit: bbc/biscuit/biscuit_0_3_16
-   biscuit: bbc/biscuit/biscuit_dev
+   #~ biscuit: bbc/biscuit/biscuit_dev
+   biscuit: bbc/biscuit/biscuit_1_0_0
    samblaster: bbc/samblaster/samblaster-0.1.24
    htslib: bbc/htslib/htslib-1.10.2
    bedtools: bbc/bedtools/bedtools-2.29.2
