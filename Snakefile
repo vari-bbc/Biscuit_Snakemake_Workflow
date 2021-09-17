@@ -53,7 +53,8 @@ rule rename_fastq:
         "logs/rename/rename_{sample}.log"
     threads: 1
     resources:
-        mem_gb=8
+        mem_gb=8,
+        walltime = config["walltime"]["short"]
     envmodules:
         config["envmodules"]["R"],
         config["envmodules"]["snakemake"],
@@ -139,7 +140,8 @@ rule trim_galore:
         config["envmodules"]["pigz"],
     threads: config["hpcParameters"]["trimThreads"]
     resources:
-        mem_gb=config["hpcParameters"]["smallMemoryGb"]
+        mem_gb=config["hpcParameters"]["smallMemoryGb"],
+        walltime = config["walltime"]["medium"]
     shell:
         """
         echo {input}
@@ -248,7 +250,8 @@ rule test_rule:
 
         trim_output = expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=[1,2]),
     resources:
-        mem_gb=32
+        mem_gb=32,
+        walltime = config["walltime"]["short"]
     shell:
        """
        echo {input.reference} > {output.test_output}
@@ -304,7 +307,8 @@ rule biscuit_align:
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
     threads: config["hpcParameters"]["maxThreads"]
     resources:
-        mem_gb = config["hpcParameters"]["maxMemoryGb"]
+        mem_gb = config["hpcParameters"]["maxMemoryGb"],
+        walltime = config["walltime"]["long"]
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
@@ -373,9 +377,10 @@ rule biscuit_pileup:
         vcf2bed = "logs/biscuit_pileup/vcf2bed.{sample}.log",
         bed_gz="logs/biscuit_pileup/bed_gz.{sample}.log",
         bed_tbi="logs/biscuit_pileup/bed_tabix.{sample}.log",
-    threads: 8
+    threads: config["hpcParameters"]["pileupThreads"]
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_pileup/{sample}.txt"
     wildcard_constraints:
@@ -415,7 +420,8 @@ rule biscuit_mergecg:
         mergecg_tbi="logs/biscuit_pileup/mergecg_tabix.{sample}.log",
     threads: 8
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_mergecg/{sample}.txt"
     wildcard_constraints:
@@ -465,7 +471,8 @@ rule biscuit_qc:
         "analysis/BISCUITqc/{sample}_CpGRetentionByReadPos.txt",
     threads: 8
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_qc/{sample}.txt"
     log:
@@ -534,7 +541,8 @@ rule multiQC:
         "logs/multiqc.log"
     threads: 1
     resources:
-        mem_gb=8
+        mem_gb=8,
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/multiQC.txt"
     envmodules:
@@ -558,7 +566,8 @@ if config["control_vectors"]:
            lambda_bed = "analysis/qc_vectors/lambda/{sample}.bed",
            puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
         resources:
-            mem_gb=32
+            mem_gb=32,
+            walltime = config["walltime"]["medium"]
         benchmark:
             "benchmarks/methylation_controls_qc/{sample}.txt"
         log:
@@ -583,7 +592,8 @@ if config["control_vectors"]:
         envmodules:
            config["envmodules"]["R"],
         resources:
-            mem_gb=32
+            mem_gb=32,
+            walltime = config["walltime"]["short"]
         output:
            control_vector_pdf = "analysis/qc_vectors/control_vector_boxplot.pdf"
         log:
@@ -607,7 +617,8 @@ if config["generate_snps"] or config["epiread"]:
            reference = newRef,
            snp_bed = "analysis/snps/{sample}.snp.bed"
         resources:
-           mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+           mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+           walltime = config["walltime"]["medium"]
         log:
            epiread = "logs/snps/snps.{sample}.log",
         shell:
@@ -633,7 +644,8 @@ if config["epiread"]:
         benchmark:
             "benchmarks/biscuit_epiread/{sample}.txt"    
         resources:
-            mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+            mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+            walltime = config["walltime"]["medium"]
         output:
             epibed_gz = "analysis/epiread/{sample}.epibed.gz",
             epibed_gz_tbi = "analysis/epiread/{sample}.epibed.gz.tbi",

@@ -70,8 +70,14 @@ envmodules:
    #~ bismark: NULL
 
 hpcParameters:
-   maxThreads: 32
-   maxMemoryGb: 250
-   intermediateMemoryGb: 100
+   maxThreads: 28
+   maxMemoryGb: 245
+   intermediateMemoryGb: 80
    smallMemoryGb: 20
    trimThreads: 8
+   pileupThreads: 8
+   
+walltime:
+   short: 1:00:00
+   medium: 24:00:00
+   long: 72:00:00
