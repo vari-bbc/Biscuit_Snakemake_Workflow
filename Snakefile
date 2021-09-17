@@ -19,9 +19,9 @@ rule all:
         # ~ expand("{samples.sample}.test", samples=samples.itertuples()),
         # rename_fastq
         expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
-        # biscuit
+        # ~ # biscuit
         expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
-        # mergecg
+        # ~ # mergecg
         expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
         expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
         # multiQC
@@ -45,7 +45,7 @@ rule all:
         # snps
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
                
-rule rename_fastq:
+rule get_R1_R2_files:
     output:
         "raw_data/{sample}-1-R1.fastq.gz", # only require 1 file / sample
         "raw_data/{sample}-1-R2.fastq.gz",
@@ -97,25 +97,25 @@ else:
     newIndex = config["ref"]["index"], 
 
 
-def get_trim_galore_index(wildcards): # this is for getting files when there is more than 1 R1 and R2
+def get_trim_reads_index(wildcards): # this is for getting files when there is more than 1 R1 and R2
     FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
     return list(FILE_INDEX)
     
-def get_trim_galore_input(wildcards):
+def get_trim_reads_input(wildcards):
     FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
     files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
-    return FILE_INDEX
-    # ~ return files
+    # ~ return FILE_INDEX
+    return files
 
-rule trim_galore:
+rule trim_reads:
     input:
-        get_trim_galore_input
+        get_trim_reads_input
     output:
-        "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
+        "analysis/trim_reads/{sample}-R1_val_1_merged.fq.gz",
         # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
         # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
         # ~ "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
-        "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
+        "analysis/trim_reads/{sample}-R2_val_2_merged.fq.gz",
         # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
         # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
         # ~ "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
@@ -125,7 +125,8 @@ rule trim_galore:
     benchmark:
         "benchmarks/trim_reads/{sample}.txt"
     params:
-        outdir = "analysis/trim_reads/{sample}/",
+        sample = "{sample}",
+        outdir = "analysis/trim_reads/",
         quality = config["trim_galore"]["quality"],
         hard_trim_R2 = config["trim_galore"]["hard_trim_R2"],
     envmodules:
@@ -160,10 +161,10 @@ rule trim_galore:
             2> {log.stderr} 1> {log.stdout}
         fi
         
-        cat analysis/trim_reads/{sample}-*-R1_val_1.fq.gz > analysis/trim_reads/{sample}-R1_val_1.fq.gz # make the merged R1
-        cat analysis/trim_reads/{sample}-*-R2_val_2.fq.gz > analysis/trim_reads/{sample}-R2_val_2.fq.gz # make the merged R2
-        rm analysis/trim_reads/{sample}-*-R1_val_1.fq.gz
-        rm analysis/trim_reads/{sample}-*-R2_val_1.fq.gz
+        cat {params.outdir}{wildcards.sample}-*-R1_val_1.fq.gz > {params.outdir}{wildcards.sample}-R1_val_1_merged.fq.gz # make the merged R1
+        cat {params.outdir}{wildcards.sample}-*-R2_val_2.fq.gz > {params.outdir}{wildcards.sample}-R2_val_2_merged.fq.gz # make the merged R2
+        rm {params.outdir}{wildcards.sample}-*-R1_val_1.fq.gz
+        rm {params.outdir}{wildcards.sample}-*-R2_val_2.fq.gz
         """
 
 if config["run_fastq_screen"]:
@@ -204,8 +205,7 @@ def get_biscuit_align_reference(wildcards):
 
 def get_rename_fastq_output_R1(wildcards):
     if config["trim_galore"]["trim_before_BISCUIT"]:
-        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-R1_val_1.fq.gz", seqfile_index = FILE_INDEX))
-        files.sort() # only getting 1 file...
+        files = "analysis/trim_reads/" + wildcards.sample + "-R1_val_1_merged.fq.gz"
         return files   
     else:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
@@ -215,10 +215,8 @@ def get_rename_fastq_output_R1(wildcards):
         
 def get_rename_fastq_output_R2(wildcards):
     if config["trim_galore"]["trim_before_BISCUIT"]:
-        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
-        files = list(expand("analysis/trim_reads/" + wildcards.sample + "-{seqfile_index}-R2_val_2.fq.gz", seqfile_index = FILE_INDEX))
-        files.sort()
-        return files
+        files = "analysis/trim_reads/" + wildcards.sample + "-R2_val_2_merged.fq.gz"
+        return files   
     else:
         FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
         files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
@@ -236,7 +234,7 @@ rule test_rule:
        # ~ R2 = "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R2.fastq.gz"],
        # ~ R1 = get_rename_fastq_output_R1,
        # ~ R2 = get_rename_fastq_output_R2
-       trimFiles = get_rename_fastq_output_R1
+       trimFiles = get_trim_reads_input
     envmodules:
        config["envmodules"]["samtools"],
        config["envmodules"]["htslib"],
@@ -244,7 +242,7 @@ rule test_rule:
        test_output = "{sample}.test"
     params:
         biscuit_version = config["biscuit"]["biscuit_blaster_version"],
-        trim_index = get_trim_galore_index,
+        trim_index = get_trim_reads_index,
 
         trim_output = expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=[1,2]),
     resources:
@@ -254,11 +252,11 @@ rule test_rule:
        """
        echo {input.reference} > {output.test_output}
        echo {samples.fq1}
-       echo "get_trim_galore_input"
+       echo "get_trim_reads_input"
        echo {input.trimFiles}
-       echo "get_trim_galore_index"
+       echo "get_trim_reads_index"
        echo {params.trim_index}
-       echo "get_trim_galore_o"
+       echo "get_trim_reads_o"
        echo {params.trim_output}
        echo {params.biscuit_version}
        """
@@ -389,7 +387,7 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        if [ {params.nome} eq "TRUE" ]; then
+        if [ {params.nome} == "TRUE" ]; then
             biscuit pileup -N -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
         else
             biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
@@ -429,7 +427,7 @@ rule biscuit_mergecg:
         config["envmodules"]["htslib"],
     shell:
         """
-        if [ {params.nome} -eq 1 ]; then
+        if [ {params.nome} == "TRUE" ]; then
             biscuit mergecg -N {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
         else
             biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
@@ -514,8 +512,8 @@ rule multiQC:
         expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         # trim_galore
-        expand("analysis/trim_reads/{samples.sample}-1-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
-        expand("analysis/trim_reads/{samples.sample}-1-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        # ~ expand("analysis/trim_reads/{samples.sample}-1-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}_merged.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
         # biscuit_qc
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_botgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_table.txt", samples=samples.itertuples()),
