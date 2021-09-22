@@ -15,8 +15,10 @@ wildcard_constraints:
 
 rule all:
     input:
-        # TEST RULE
-        # ~ expand("{samples.sample}.test", samples=samples.itertuples()),
+        # Sliding window / binned Averages
+        # ~ "analysis/binnedAverages/" if config["SlidingWindow"]["run"] else [],
+        # Download CpG Islands
+        # ~ "analysis/cpgIslands/" if config["SubsetToFeatures"]["run"] else [],
         # rename_fastq
         expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
         # ~ # biscuit
@@ -222,44 +224,109 @@ def get_rename_fastq_output_R2(wildcards):
         files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
         files.sort()
         return files
-           
-rule test_rule:
-    input:
-       reference = get_biscuit_align_reference,
-       # ~ R1 = expand("analysis/trim_reads/{sample}-R{read}_val_{read}.fq.gz", read=[1,2], sample={sample}) if config["trim_galore"]["trim_before_BISCUIT"] else []
-       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else R1 = list("raw_data/" + samples['fq2']),
-       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq1'])],
-       # ~ R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq2'])]
-       # ~ R1 = "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R1.fastq.gz"],
-       # ~ R2 = "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R2.fastq.gz"],
-       # ~ R1 = get_rename_fastq_output_R1,
-       # ~ R2 = get_rename_fastq_output_R2
-       trimFiles = get_trim_reads_input
-    envmodules:
-       config["envmodules"]["samtools"],
-       config["envmodules"]["htslib"],
-    output:
-       test_output = "{sample}.test"
-    params:
-        biscuit_version = config["biscuit"]["biscuit_blaster_version"],
-        trim_index = get_trim_reads_index,
 
-        trim_output = expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=[1,2]),
-    resources:
-        mem_gb=32,
-        walltime = config["walltime"]["short"]
-    shell:
-       """
-       echo {input.reference} > {output.test_output}
-       echo {samples.fq1}
-       echo "get_trim_reads_input"
-       echo {input.trimFiles}
-       echo "get_trim_reads_index"
-       echo {params.trim_index}
-       echo "get_trim_reads_o"
-       echo {params.trim_output}
-       echo {params.biscuit_version}
-       """
+if config["SlidingWindow"]["run"]:  
+    rule slidingWindow:
+        input:
+            # pileup
+            # ~ expand("analysis/pileup/{samples.sample}.bed.gz", samples=samples.itertuples()),
+            # ~ expand("analysis/pileup/{samples.sample}.bed.gz.tbi", samples=samples.itertuples()),
+        params:
+            covFilter = config["SlidingWindow"]["covFilter"],
+        output:
+            dir = directory("analysis/binnedAverages/",)
+        log:
+            "logs/slidingWindow.log"
+        threads: 1
+        resources:
+            mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+            walltime = config["walltime"]["medium"]
+        benchmark:
+            "benchmarks/slidingWindow.txt"
+        envmodules:
+            config["envmodules"]["multiqc"],
+            config["envmodules"]["fastqc"],
+        shell:
+            """
+            echo "hewo world"
+            mkdir -p {output.dir}
+            window=(1000 10000 100000 1000000 10000000)
+            for i in "${{window[@]}}"
+            do
+                ./bin/slidingWindow.pl -indir analysis/pileup/ -windowSize ${{i}} -covFilter {params.covFilter} -out {output.dir}/${{i}}.tsv
+            done
+            """   
+
+if config["SubsetToFeatures"]["run"]:  
+    rule cpgIslands:
+        input:
+            reference = get_biscuit_align_reference,
+            # ~ expand("analysis/pileup/{samples.sample}.bed.gz", samples=samples.itertuples()),
+            # ~ expand("analysis/pileup/{samples.sample}.bed.gz.tbi", samples=samples.itertuples()),
+        params:
+        output:
+            dir = directory("analysis/cpgIslands/",)
+        log:
+            "logs/cpgi.log"
+        threads: 1
+        resources:
+            mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+            walltime = config["walltime"]["medium"]
+        benchmark:
+            "benchmarks/cpgi.txt"
+        envmodules:
+            config["envmodules"]["bedtools"],
+        shell:
+            """
+            mkdir -p {output.dir}
+            cd {output.dir}
+            
+            # Reference location
+            REFLOC={input.reference}.fai
+
+            # CpG Islands from UCSC on only the canonical chromosomes
+            wget -qO- http://hgdownload.cse.ucsc.edu/goldenpath/hg38/database/cpgIslandExt.txt.gz | \
+            gunzip -c | \
+            awk 'BEGIN{{ OFS="\\t"; }}{{ print $2, $3, $4; }}' | \
+            awk '{{ if ($1 ~ /^chr[1234567890XYM]{{1,2}}$/) {{ print }} }}' | \
+            bedtools sort -i - \
+            > cpg_islands.bed
+
+            # Create middles for finding locations
+            bedtools slop \
+                -i cpg_islands.bed \
+                -g ${{REFLOC}} \
+                -b 2000 | \
+            bedtools merge -i - \
+            > shores.tmp.bed
+
+            bedtools slop \
+                -i cpg_islands.bed \
+                -g ${{REFLOC}} \
+                -b 4000 | \
+            bedtools merge -i - \
+            > shelves.tmp.bed
+
+            # CpG Open Seas (intervening locations)
+            sort -k1,1 -k2,2n ${{REFLOC}} | \
+            bedtools complement -L -i shelves.tmp.bed -g - \
+            > cpg_open_seas.bed
+
+            # CpG Shelves (shores +/- 2kb)
+            bedtools subtract \
+                -a shelves.tmp.bed \
+                -b shores.tmp.bed \
+            > cpg_shelves.bed
+
+            # CpG Shores (island +/- 2kb)
+            bedtools subtract \
+                -a shores.tmp.bed \
+                -b cpg_islands.bed \
+            > cpg_shores.bed
+
+            # Clean up temporary files
+            rm -f shelves.tmp.bed shores.tmp.bed
+            """       
 
 rule biscuit_align:
     input:
