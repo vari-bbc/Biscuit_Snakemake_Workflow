@@ -6,8 +6,8 @@ Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 
 # Components of the workflow
 	0. [default off] Modify and index genome reference to including methylation controls
-	1. Trim adapters
-	2. Alignment, duplicate tagging, indexing, flagstat 
+	1. [default off] Trim adapters and/or hard clip R2
+	2. Alignment, duplicate tagging, indexing, flagstat  (biscuitBlaster v1 and v2)
 	3. Methylation information extraction (BED Format)
 	4. Merge C annd G beta values in CpG dinucleotide context
 	5. SNP and Epiread extraction
@@ -61,7 +61,9 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 	+ Specify other run parameters
 
 
-+ Submit the workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
++ Run the first rule of Snakemake on the command line. This rule will collect the list of comma separated R1 and R2 files in bin/samples.tsv and rename them. This rule needs to be run *separately first* for the correct R1 and R2 files to be passed to biscuit_align. This rule takes only a few seconds per sample, and allows quick debugging of missing input files.
+	+ `snakemake --cores 2 --use-envmodules --until get_R1_R2_files`
++ Then submit the rest workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g. qsub -q [queue_name] bin/run_snakemake_workflow.sh)
 
 # After the workflow
 

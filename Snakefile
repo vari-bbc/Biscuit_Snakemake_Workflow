@@ -10,38 +10,31 @@ min_version("5.20.1")
 samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
 biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa","fai"]
+wildcard_constraints:
+   seqfile_index = '\d+'
 
 rule all:
     input:
-        # rename
-        # expand("raw_data/{samples.sample}-R{read}.fastq.gz", read=[1,2], samples=samples.itertuples()),
-        # trim_galore
-        # expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()),
-        # expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()),
-        # biscuit
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam.bai", samples=samples.itertuples()),
-        # expand("analysis/align/{samples.sample}.sorted.markdup.bam.flagstat", samples=samples.itertuples()),
-        # biscuit_pileup
-        # expand("analysis/pileup/{samples.sample}.vcf.gz", samples=samples.itertuples()),
-        # expand("analysis/pileup/{samples.sample}.bed.gz", samples=samples.itertuples()),
-        # expand("analysis/pileup/{samples.sample}.bed.gz.tbi", samples=samples.itertuples()),
-        # mergecg
+        # TEST RULE
+        # ~ expand("{samples.sample}.test", samples=samples.itertuples()),
+        # rename_fastq
+        expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
+        # ~ # biscuit
+        expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
+        # ~ # mergecg
         expand("analysis/pileup/{samples.sample}_mergecg.bed.gz", samples=samples.itertuples()),
         expand("analysis/pileup/{samples.sample}_mergecg.bed.gz.tbi", samples=samples.itertuples()),
-        # mergecg_combined
-        # "analysis/pileup/combined_mergecg.bed.gz",
-        # "analysis/pileup/combined_mergecg.bed.gz.tbi",
-        # biscuit_qc
         # multiQC
         "analysis/multiqc/multiqc_report.html",
         # rule for checking that data is not trimmed
+        
         # rules for quality control vectors
         expand("analysis/qc_vectors/lambda/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         expand("analysis/qc_vectors/puc19/{samples.sample}.bed", samples=samples.itertuples()) if config["control_vectors"] else [],
         "analysis/qc_vectors/control_vector_boxplot.pdf" if config["control_vectors"] else [], # for qc_vectors plot
+        
         # rules for fastq_screen
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [], # for fastQC screen
         
         # output of rule build_ref_with_methylation_controls
         expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS) if config["build_ref_with_methylation_controls"] else [],
@@ -51,17 +44,17 @@ rule all:
         expand("analysis/epiread/{samples.sample}.epibed.gz", samples=samples.itertuples()) if config["epiread"] else [],
         # snps
         expand("analysis/snps/{samples.sample}.snp.bed.gz", samples=samples.itertuples()) if config["generate_snps"] else [],
-        expand("analysis/trim_reads/{samples.sample}-R1_val_1.fq.gz", samples=samples.itertuples())
-        
-rule rename_fastq:
+               
+rule get_R1_R2_files:
     output:
-        "raw_data/{sample}-R1.fastq.gz",
-        "raw_data/{sample}-R2.fastq.gz",
+        "raw_data/{sample}-1-R1.fastq.gz", # only require 1 file / sample
+        "raw_data/{sample}-1-R2.fastq.gz",
     log:
         "logs/rename/rename_{sample}.log"
     threads: 1
     resources:
-        mem_gb=8
+        mem_gb=8,
+        walltime = config["walltime"]["short"]
     envmodules:
         config["envmodules"]["R"],
         config["envmodules"]["snakemake"],
@@ -104,27 +97,37 @@ else:
     newIndex = config["ref"]["index"], 
 
 
-rule trim_galore:
+def get_trim_reads_index(wildcards): # this is for getting files when there is more than 1 R1 and R2
+    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+    return list(FILE_INDEX)
+    
+def get_trim_reads_input(wildcards):
+    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
+    files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
+    # ~ return FILE_INDEX
+    return files
+
+rule trim_reads:
     input:
-        "raw_data/{sample}-R1.fastq.gz",
-        "raw_data/{sample}-R2.fastq.gz"
+        get_trim_reads_input
     output:
-        "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
-        "analysis/trim_reads/{sample}-R1_val_1_fastqc.html",
-        "analysis/trim_reads/{sample}-R1_val_1_fastqc.zip",
-        "analysis/trim_reads/{sample}-R1.fastq.gz_trimming_report.txt",
-        "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
-        "analysis/trim_reads/{sample}-R2_val_2_fastqc.html",
-        "analysis/trim_reads/{sample}-R2_val_2_fastqc.zip",
-        "analysis/trim_reads/{sample}-R2.fastq.gz_trimming_report.txt"
+        "analysis/trim_reads/{sample}-R1_val_1_merged.fq.gz",
+        # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.html",
+        # ~ "analysis/trim_reads/{sample}-1-R1_val_1_fastqc.zip",
+        # ~ "analysis/trim_reads/{sample}-1-R1.fastq.gz_trimming_report.txt",
+        "analysis/trim_reads/{sample}-R2_val_2_merged.fq.gz",
+        # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.html",
+        # ~ "analysis/trim_reads/{sample}-1-R2_val_2_fastqc.zip",
+        # ~ "analysis/trim_reads/{sample}-1-R2.fastq.gz_trimming_report.txt"
     log:
         stdout="logs/trim_reads/{sample}.o",
         stderr="logs/trim_reads/{sample}.e"
     benchmark:
         "benchmarks/trim_reads/{sample}.txt"
     params:
+        sample = "{sample}",
         outdir = "analysis/trim_reads/",
-        quality = config["trim_galore"]["q"],
+        quality = config["trim_galore"]["quality"],
         hard_trim_R2 = config["trim_galore"]["hard_trim_R2"],
     envmodules:
         config["envmodules"]["trim_galore"],
@@ -132,9 +135,11 @@ rule trim_galore:
         config["envmodules"]["pigz"],
     threads: config["hpcParameters"]["trimThreads"]
     resources:
-        mem_gb=80
+        mem_gb=config["hpcParameters"]["smallMemoryGb"],
+        walltime = config["walltime"]["medium"]
     shell:
         """
+        echo {input}
         if [ {params.hard_trim_R2} -ge 1 ]; then
             trim_galore \
             --paired \
@@ -155,18 +160,23 @@ rule trim_galore:
             --fastqc \
             2> {log.stderr} 1> {log.stdout}
         fi
+        
+        cat {params.outdir}{wildcards.sample}-*-R1_val_1.fq.gz > {params.outdir}{wildcards.sample}-R1_val_1_merged.fq.gz # make the merged R1
+        cat {params.outdir}{wildcards.sample}-*-R2_val_2.fq.gz > {params.outdir}{wildcards.sample}-R2_val_2_merged.fq.gz # make the merged R2
+        rm {params.outdir}{wildcards.sample}-*-R1_val_1.fq.gz
+        rm {params.outdir}{wildcards.sample}-*-R2_val_2.fq.gz
         """
 
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            read1 = "raw_data/{sample}-R1.fastq.gz",
-            read2 = "raw_data/{sample}-R2.fastq.gz",
+            read1 = "raw_data/{sample}-1-R1.fastq.gz", # ***only the first if there are multiple files***
+            read2 = "raw_data/{sample}-1-R2.fastq.gz",
         output:
-            "analysis/fastq_screen/{sample}-R1_screen.html",
-            "analysis/fastq_screen/{sample}-R2_screen.html",
-            "analysis/fastq_screen/{sample}-R1_screen.txt",
-            "analysis/fastq_screen/{sample}-R2_screen.txt",
+            "analysis/fastq_screen/{sample}-1-R1_screen.html",
+            "analysis/fastq_screen/{sample}-1-R2_screen.html",
+            "analysis/fastq_screen/{sample}-1-R1_screen.txt",
+            "analysis/fastq_screen/{sample}-1-R2_screen.txt",
         log:
             fastq_screen = "logs/fastq_screen/{sample}.log",
         params:
@@ -184,7 +194,8 @@ if config["run_fastq_screen"]:
             """
             fastq_screen --bisulfite --conf {params.config} --outdir analysis/fastq_screen/ {input} 2> {log.fastq_screen}
             """
-def get_biscuit_align_input(wildcards):
+
+def get_biscuit_align_reference(wildcards):
     if config["build_ref_with_methylation_controls"]:
         input = expand("snakemake_built_reference_with_methylation_controls/merged.fa.gz.{ext}", ext=biscuitIndexFORMATS)
         return input
@@ -192,20 +203,77 @@ def get_biscuit_align_input(wildcards):
         input = config["ref"]["fasta"] # else just require default reference
         return input
 
+def get_rename_fastq_output_R1(wildcards):
+    if config["trim_galore"]["trim_before_BISCUIT"]:
+        files = "analysis/trim_reads/" + wildcards.sample + "-R1_val_1_merged.fq.gz"
+        return files   
+    else:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R1.fastq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
+        return files
+        
+def get_rename_fastq_output_R2(wildcards):
+    if config["trim_galore"]["trim_before_BISCUIT"]:
+        files = "analysis/trim_reads/" + wildcards.sample + "-R2_val_2_merged.fq.gz"
+        return files   
+    else:
+        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
+        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
+        files.sort()
+        return files
+           
+rule test_rule:
+    input:
+       reference = get_biscuit_align_reference,
+       # ~ R1 = expand("analysis/trim_reads/{sample}-R{read}_val_{read}.fq.gz", read=[1,2], sample={sample}) if config["trim_galore"]["trim_before_BISCUIT"] else []
+       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else R1 = list("raw_data/" + samples['fq2']),
+       # ~ R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq1'])],
+       # ~ R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else [list("raw_data/" + samples['fq2'])]
+       # ~ R1 = "analysis/trim_reads/{sample}-1-R1_val_1.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R1.fastq.gz"],
+       # ~ R2 = "analysis/trim_reads/{sample}-1-R2_val_2.fq.gz" if config["trim_galore"]["trim_before_BISCUIT"] else ["raw_data/{sample}-1-R2.fastq.gz"],
+       # ~ R1 = get_rename_fastq_output_R1,
+       # ~ R2 = get_rename_fastq_output_R2
+       trimFiles = get_trim_reads_input
+    envmodules:
+       config["envmodules"]["samtools"],
+       config["envmodules"]["htslib"],
+    output:
+       test_output = "{sample}.test"
+    params:
+        biscuit_version = config["biscuit"]["biscuit_blaster_version"],
+        trim_index = get_trim_reads_index,
+
+        trim_output = expand("analysis/trim_reads/{{sample}}-{index}-R1_val_1.fq.gz", index=[1,2]),
+    resources:
+        mem_gb=32,
+        walltime = config["walltime"]["short"]
+    shell:
+       """
+       echo {input.reference} > {output.test_output}
+       echo {samples.fq1}
+       echo "get_trim_reads_input"
+       echo {input.trimFiles}
+       echo "get_trim_reads_index"
+       echo {params.trim_index}
+       echo "get_trim_reads_o"
+       echo {params.trim_output}
+       echo {params.biscuit_version}
+       """
+
 rule biscuit_align:
     input:
-        get_biscuit_align_input,
-        R1 = "analysis/trim_reads/{sample}-R1_val_1.fq.gz",
-        R2 = "analysis/trim_reads/{sample}-R2_val_2.fq.gz",
-        
+        reference = get_biscuit_align_reference,
+        R1 = get_rename_fastq_output_R1,
+        R2 = get_rename_fastq_output_R2
     output:
         bam = "analysis/align/{sample}.sorted.markdup.bam",
         bai = "analysis/align/{sample}.sorted.markdup.bam.bai",
-        disc = "analysis/align/{sample}.disc.sorted.bam",
-        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai",
-        split = "analysis/align/{sample}.split.sorted.bam",
-        split_bai = "analysis/align/{sample}.split.sorted.bam.bai",
-        unmapped = "analysis/align/{sample}.unmapped.fastq.gz",
+        disc = "analysis/align/{sample}.disc.sorted.bam" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.disc"],
+        disc_bai = "analysis/align/{sample}.disc.sorted.bam.bai" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.disc.bai"],
+        split = "analysis/align/{sample}.split.sorted.bam" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.split"],
+        split_bai = "analysis/align/{sample}.split.sorted.bam.bai" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.split.bai"],
+        unmapped = "analysis/align/{sample}.unmapped.fastq.gz" if config["biscuit"]["biscuit_blaster_version"] == "v2" else ["analysis/align/{sample}.no.unmapped"],
         flagstat = "analysis/align/{sample}.sorted.markdup.bam.flagstat",
     params:
         # don't include the .fa/.fasta suffix for the reference biscuit idx.
@@ -219,8 +287,10 @@ rule biscuit_align:
         disc = "analysis/align/{sample}.disc.sam",
         split = "analysis/align/{sample}.split.sam",
         unmapped = "analysis/align/{sample}.unmapped.fastq",
+        biscuit_version = config["biscuit"]["biscuit_blaster_version"]
     log:
         biscuit = "logs/biscuit/biscuit_align.{sample}.log",
+        biscuit_blaster_version = "logs/biscuit/blaster_version.{sample}.log",
         samblaster = "logs/biscuit/samblaster.{sample}.log",
         samtools_view = "logs/biscuit/samtools_view.{sample}.log",
         samtools_sort = "logs/biscuit/samtools_sort.{sample}.log",
@@ -233,7 +303,8 @@ rule biscuit_align:
         bgzip_unmapped = "logs/biscuit/bgzip_unmapped.{sample}.log",       
     threads: config["hpcParameters"]["maxThreads"]
     resources:
-        mem_gb = config["hpcParameters"]["maxMemoryGb"]
+        mem_gb = config["hpcParameters"]["maxMemoryGb"],
+        walltime = config["walltime"]["long"]
     benchmark:
         "benchmarks/biscuit_align/{sample}.txt"
     envmodules:
@@ -244,23 +315,43 @@ rule biscuit_align:
         config["envmodules"]["htslib"],
     shell:
         """
-        biscuit align -@     {threads} -b {params.lib_type} \
-        -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
-        {params.ref} {input.R1} {input.R2} 2> {log.biscuit} | \
-        samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
-        samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
-        samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
-        samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
-        samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
-        samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
-        samtools index -@ {threads} {output.disc} 2> {log.index_disc}
-        samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
-        samtools index -@ {threads} {output.split} 2> {log.index_split}
-        bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
-        rm {params.disc}
-        rm {params.split}
+        if [ {params.biscuit_version} == "v2" ]; then
+            echo "biscuit blaster v2" 2> {log.biscuit_blaster_version}
+            biscuit align -@ {threads} -b {params.lib_type} \
+            -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
+            {params.ref} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
+            samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+            samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
+            samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
+            samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
+            samtools sort -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
+            samtools index -@ {threads} {output.disc} 2> {log.index_disc}
+            samtools sort -o {output.split} -O BAM {params.split} 2> {log.sort_split}
+            samtools index -@ {threads} {output.split} 2> {log.index_split}
+            bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
+            rm {params.disc}
+            rm {params.split}
+        elif [ {params.biscuit_version} == "v1" ]; then
+            echo "biscuit blaster v1" 2> {log.biscuit_blaster_version}
+            biscuit align -@ {threads} -b {params.lib_type} \
+            -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
+            {params.ref} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
+            samblaster -r --addMateTags 2> {log.samblaster} | \
+            samtools view -hbu -F 4 -q 30 2> {log.samtools_view} |
+            samtools sort -@ {threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {threads} {output.bam} 2> {log.samtools_index}
+            samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
+            touch {output.disc}
+            touch {output.disc_bai}
+            touch {output.split}
+            touch {output.split_bai}
+            touch {output.unmapped}
+        else
+            echo "biscuit: biscuit_blaster_version must be v1 or v2 in bin/config.yaml" 2> {log.biscuit_blaster_version}
+        fi
         """
-
+        
 rule biscuit_pileup:
     input:
         bam="analysis/align/{sample}.sorted.markdup.bam",
@@ -268,6 +359,7 @@ rule biscuit_pileup:
         ref=newRef,
         vcf="analysis/pileup/{sample}.vcf",
         bed="analysis/pileup/{sample}.bed",
+        nome=config["is_nome"]
     output:
         vcf_gz="analysis/pileup/{sample}.vcf.gz",
         vcf_tabix="analysis/pileup/{sample}.vcf.gz.tbi",
@@ -281,9 +373,10 @@ rule biscuit_pileup:
         vcf2bed = "logs/biscuit_pileup/vcf2bed.{sample}.log",
         bed_gz="logs/biscuit_pileup/bed_gz.{sample}.log",
         bed_tbi="logs/biscuit_pileup/bed_tabix.{sample}.log",
-    threads: 8
+    threads: config["hpcParameters"]["pileupThreads"]
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_pileup/{sample}.txt"
     wildcard_constraints:
@@ -294,7 +387,11 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        if [ {params.nome} == "TRUE" ]; then
+            biscuit pileup -N -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        else
+            biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
+        fi
         bgzip {params.vcf} 2> {log.vcf_gz}
         tabix -p vcf {output.vcf_gz} 2> {log.vcf_tbi}
 
@@ -309,6 +406,7 @@ rule biscuit_mergecg:
     params:
         ref=newRef,
         mergecg="analysis/pileup/{sample}_mergecg.bed",
+        nome=config["is_nome"]
     output:
         mergecg_gz="analysis/pileup/{sample}_mergecg.bed.gz",
         mergecg_tbi="analysis/pileup/{sample}_mergecg.bed.gz.tbi",
@@ -318,7 +416,8 @@ rule biscuit_mergecg:
         mergecg_tbi="logs/biscuit_pileup/mergecg_tabix.{sample}.log",
     threads: 8
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_mergecg/{sample}.txt"
     wildcard_constraints:
@@ -328,7 +427,11 @@ rule biscuit_mergecg:
         config["envmodules"]["htslib"],
     shell:
         """
-        biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        if [ {params.nome} == "TRUE" ]; then
+            biscuit mergecg -N {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        else
+            biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
+        fi
         bgzip {params.mergecg} 2> {log.mergecg_gz}
         tabix -p bed {output.mergecg_gz} 2> {log.mergecg_tbi}
         """
@@ -364,7 +467,8 @@ rule biscuit_qc:
         "analysis/BISCUITqc/{sample}_CpGRetentionByReadPos.txt",
     threads: 8
     resources:
-        mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+        mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/biscuit_qc/{sample}.txt"
     log:
@@ -388,22 +492,28 @@ rule biscuit_qc:
         2> {log}
         """
 
-def get_multiQC_input(wildcards):
-    if config["run_fastq_screen"]:
+def get_multiQC_params(wildcards):
+    if config["run_fastq_screen"] and config["trim_galore"]["trim_before_BISCUIT"]:
         input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen"
         return input
+    elif config["run_fastq_screen"]:
+        input = "raw_data/ analysis/BISCUITqc/ analysis/fastq_screen"
+        return input
+    elif config["trim_galore"]["trim_before_BISCUIT"]:
+        input = "raw_data/ analysis/BISCUITqc/ analysis/trim_reads/"
+        return input
     else:
-        input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/"
+        input = "raw_data/ analysis/BISCUITqc/"
         return input
         
 rule multiQC:
     input:
         # fastq_screen
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
-        expand("analysis/fastq_screen/{samples.sample}-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.html", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
+        expand("analysis/fastq_screen/{samples.sample}-1-R{read}_screen.txt", read=[1,2], samples=samples.itertuples()) if config["run_fastq_screen"] else [],
         # trim_galore
-        expand("analysis/trim_reads/{samples.sample}-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()),
-        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}.fq.gz", read=[1,2], samples=samples.itertuples()),
+        # ~ expand("analysis/trim_reads/{samples.sample}-1-R{read}.fastq.gz_trimming_report.txt", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
+        expand("analysis/trim_reads/{samples.sample}-R{read}_val_{read}_merged.fq.gz", read=[1,2], samples=samples.itertuples()) if config["trim_galore"]["trim_before_BISCUIT"] else [],
         # biscuit_qc
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_botgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_covdist_all_base_table.txt", samples=samples.itertuples()),
@@ -419,7 +529,7 @@ rule multiQC:
         expand("analysis/BISCUITqc/{samples.sample}_covdist_q40_cpg_topgc_table.txt", samples=samples.itertuples()),
         expand("analysis/BISCUITqc/{samples.sample}_cv_table.txt", samples=samples.itertuples()),
     params:
-        get_multiQC_input
+        get_multiQC_params
     output:
         directory("analysis/multiqc/multiqc_report_data",),
         "analysis/multiqc/multiqc_report.html",
@@ -427,7 +537,8 @@ rule multiQC:
         "logs/multiqc.log"
     threads: 1
     resources:
-        mem_gb=8
+        mem_gb=8,
+        walltime = config["walltime"]["medium"]
     benchmark:
         "benchmarks/multiQC.txt"
     envmodules:
@@ -451,7 +562,8 @@ if config["control_vectors"]:
            lambda_bed = "analysis/qc_vectors/lambda/{sample}.bed",
            puc19_bed = "analysis/qc_vectors/puc19/{sample}.bed",
         resources:
-            mem_gb=32
+            mem_gb=32,
+            walltime = config["walltime"]["medium"]
         benchmark:
             "benchmarks/methylation_controls_qc/{sample}.txt"
         log:
@@ -476,7 +588,8 @@ if config["control_vectors"]:
         envmodules:
            config["envmodules"]["R"],
         resources:
-            mem_gb=32
+            mem_gb=32,
+            walltime = config["walltime"]["short"]
         output:
            control_vector_pdf = "analysis/qc_vectors/control_vector_boxplot.pdf"
         log:
@@ -490,60 +603,65 @@ if config["generate_snps"] or config["epiread"]:
            vcf_gz = "analysis/pileup/{sample}.vcf.gz",
            bam="analysis/align/{sample}.sorted.markdup.bam",
         output:
-           snp_bed = "analysis/snps/{sample}.snp.bed"
+           snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz",
+           snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         envmodules:
            config["envmodules"]["biscuit"],
         benchmark:
             "benchmarks/biscuit_snps/{sample}.txt"        
         params:
            reference = newRef,
+           snp_bed = "analysis/snps/{sample}.snp.bed"
         resources:
-           mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+           mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+           walltime = config["walltime"]["medium"]
         log:
            epiread = "logs/snps/snps.{sample}.log",
         shell:
            """
-           biscuit vcf2bed -t snp {input.vcf_gz} > {output.snp_bed}
+           biscuit vcf2bed -t snp {input.vcf_gz} > {params.snp_bed}
+           bgzip {params.snp_bed}
+           tabix -p bed {output.snp_bed_gz}
            """
 
 if config["epiread"]:
     rule biscuit_epiread:
         input: 
             bam = "analysis/align/{sample}.sorted.markdup.bam",
-            snps = "analysis/snps/{sample}.snp.bed",
+            snps = "analysis/snps/{sample}.snp.bed.gz",
+            snps_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi",
         envmodules:
            config["envmodules"]["biscuit"],
            config["envmodules"]["htslib"],
         params:
             reference = newRef,
             epibed = "analysis/epiread/{sample}.epibed",
-            snp_bed = "analysis/snps/{sample}.snp.bed"
+            nome=config["is_nome"]
         benchmark:
             "benchmarks/biscuit_epiread/{sample}.txt"    
         resources:
-            mem_gb = config["hpcParameters"]["intermediateMemoryGb"]
+            mem_gb = config["hpcParameters"]["intermediateMemoryGb"],
+            walltime = config["walltime"]["medium"]
         output:
             epibed_gz = "analysis/epiread/{sample}.epibed.gz",
             epibed_gz_tbi = "analysis/epiread/{sample}.epibed.gz.tbi",
-            snp_bed_gz = "analysis/snps/{sample}.snp.bed.gz",
-            snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         log:
            epiread = "logs/epiread/epiread.{sample}.log",
         shell:
            """
-           biscuit epiread -B {input.snps} {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+           if [[ "$(zcat {input.snps} | head -n 1 | wc -l)" == "1" ]]; then
+               if [ {params.nome} -eq 1 ]; then
+                   biscuit epiread -N -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               else
+                   biscuit epiread -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               fi
+           else
+               if [ {params.nome} -eq 1 ]; then
+                   biscuit epiread -N {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               else
+                   biscuit epiread {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
+               fi
+           fi
            bgzip {params.epibed}
            tabix -p bed {output.epibed_gz}
-           bgzip {params.snp_bed}
-           tabix -p bed {output.snp_bed_gz}
            """
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
