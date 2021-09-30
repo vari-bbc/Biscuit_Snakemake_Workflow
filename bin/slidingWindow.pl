@@ -55,7 +55,7 @@ my %chr = ();
 my %samples = ();
 
 #~ my @files = `ls $indir|grep .bed.gz\$ |head -2`;
-my @files = `ls $indir|grep .bed.gz\$`;
+my @files = `ls $indir|grep _mergecg.bed.gz\$`;
 chomp(@files);
 for(my $i=0;$i<=$#files;$i++){
 	my $f = $files[$i];
