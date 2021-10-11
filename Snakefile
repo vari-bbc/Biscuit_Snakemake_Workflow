@@ -674,6 +674,7 @@ if config["generate_snps"] or config["epiread"]:
            snp_bed_gz_tbi = "analysis/snps/{sample}.snp.bed.gz.tbi"
         envmodules:
            config["envmodules"]["biscuit"],
+           config["envmodules"]["htslib"]
         benchmark:
             "benchmarks/biscuit_snps/{sample}.txt"        
         params:
