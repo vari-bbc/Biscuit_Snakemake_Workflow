@@ -21,7 +21,7 @@ snakemake \
 -V \
 -l nodes=1:ppn={threads} \
 -l mem={resources.mem_gb}gb \
--l walltime=400:00:00 \
+-l walltime={resources.walltime} \
 -o logs/runs/ \
 -e logs/runs/"
 
