@@ -4,7 +4,7 @@ ref:
   assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets # prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 
 trim_galore:
-   trim_before_BISCUIT: FALSE
+   trim_before_BISCUIT: False
    quality: 30 #  Trim low-quality ends from reads in addition to adapter removal.
    hard_trim_R2: 15 # --clip_R2 <int> argument from trim_galore. Must be integer. For swift kit, set this to 14 or 15. Not done unless trim_before_BISCUIT == TRUE
 
@@ -12,22 +12,22 @@ biscuit:
    biscuit_blaster_version: v1 # specify v1 or v2
    lib_type: 0 # biscuit -b option (for strandedness)
 
-build_ref_with_methylation_controls: FALSE # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
+build_ref_with_methylation_controls: False # IF config["append_control_vectors"], THEN a new reference is used that is made and indexed during the workflow. 
 # This new reference is the config["ref"]["fasta"] (line 2 of this document) and the two control vectors included in bin/.
 # These two control vectors are only included in Illumina's NEBNext® Enzymatic Methyl-seq Kit
 # Reads will be mapped to this new reference...
 
-control_vectors: FALSE # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
+control_vectors: False # If config["control_vectors"], then the bed files for the controls be extracted and summarized in a plot in analysis/qc_vectors/control_vector_boxplot.pdf
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 
-is_nome: FALSE # If data is NOMe-seq data, set to TRUE
+is_nome: False # If data is NOMe-seq data, set to TRUE
 
-run_fastq_screen: FALSE # run fastq_screen with --bisulfite mode (uses Bismark)
+run_fastq_screen: False # run fastq_screen with --bisulfite mode (uses Bismark)
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf # option passed to --conf in fastq_screen
  
-generate_snps: FALSE # do you want biscuit to call SNPs?
-epiread: FALSE # do you want to get epiread format?
+generate_snps: False # do you want biscuit to call SNPs?
+epiread: False # do you want to get epiread format?
 
 sam_header: #
    PL: il
@@ -90,12 +90,12 @@ walltime:
 
 #### WARNING ///// STUFF BELOW HERE IS UNDER DEVELOPMENT AND NOT RECOMMENDED TO TURN ON
 SlidingWindow:
-   run: FALSE
+   run: False
    covFilter: 10
    
 SubsetToFeatures: # subset mergecg.bed.gz & epibed files to genomic feaures
 # genomic features include 
 # cpg_islands.bed  cpg_open_seas.bed  cpg_shelves.bed  cpg_shores.bed
 #
-   run: TRUE
+   run: True
 
