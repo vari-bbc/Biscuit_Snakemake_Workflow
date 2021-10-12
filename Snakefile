@@ -248,7 +248,6 @@ if config["SlidingWindow"]["run"]:
             config["envmodules"]["fastqc"],
         shell:
             """
-            echo "hewo world"
             mkdir -p {output.dir}
             window=(1000 10000 100000 1000000 10000000)
             for i in "${{window[@]}}"
@@ -454,7 +453,7 @@ rule biscuit_pileup:
         config["envmodules"]["bedtools"],
     shell:
         """
-        if [ {params.nome} == "TRUE" ]; then
+        if [ {params.nome} == "True" ]; then
             biscuit pileup -N -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
         else
             biscuit pileup -@ {threads} -o {params.vcf} {params.ref} {input.bam} 2> {log.pileup}
@@ -494,7 +493,7 @@ rule biscuit_mergecg:
         config["envmodules"]["htslib"],
     shell:
         """
-        if [ {params.nome} == "TRUE" ]; then
+        if [ {params.nome} == "True" ]; then
             biscuit mergecg -N {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
         else
             biscuit mergecg {params.ref} {input.bed} 1> {params.mergecg} 2> {log.mergecg}
@@ -718,13 +717,13 @@ if config["epiread"]:
         shell:
            """
            if [[ "$(zcat {input.snps} | head -n 1 | wc -l)" == "1" ]]; then
-               if [ {params.nome} -eq 1 ]; then
+               if [ {params.nome} == "True" ]; then
                    biscuit epiread -N -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
                else
                    biscuit epiread -B <(zcat {input.snps}) {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
                fi
            else
-               if [ {params.nome} -eq 1 ]; then
+               if [ {params.nome} == "True" ]; then
                    biscuit epiread -N {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
                else
                    biscuit epiread {params.reference} {input.bam} | sort -k1,1 -k2,2n > {params.epibed}
