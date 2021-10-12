@@ -58,7 +58,8 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 	+ Biscuit QC assets (https://github.com/huishenlab/biscuit/releases/tag/v0.3.16.20200420)
 	+ Environmental modules (If modules are not available, snakemake gives a warning but will run successfully *as long as the required executables are in the path*)
 	+ Toggle optional workflow components
-	+ Specify other run parameters
+	+ Set other run parameters in bin/config.yaml
+	+ Turn on option rules in bin/config.yaml (change from False to True)
 
 
 + Run the first rule of Snakemake on the command line. This rule will collect the list of comma separated R1 and R2 files in bin/samples.tsv and rename them. This rule needs to be run *separately first* for the correct R1 and R2 files to be passed to biscuit_align. This rule takes only a few seconds per sample, and allows quick debugging of missing input files.
