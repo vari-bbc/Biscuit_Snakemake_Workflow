@@ -3,3 +3,7 @@ analysis/
 
 # Ignore .snakemake/ directory
 .snakemake
+
+# Ignore macOS directory preferences and hidden files
+*.DS_Store
+._*
