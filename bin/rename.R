@@ -1,40 +1,35 @@
-#log <- file(snakemake@log[[1]], open="wt")
-#sink(log)
-#sink(log, type="message")
-
-# library(tidyverse)
-# setwd('/Volumes/researchtemp/hpctmp/ian.beddows/canary_WGBS_snakemake/Biscuit_Snakemake_Workflow')
-units <- read.delim("bin/samples.tsv",sep="\t")
-
-for(samp in units$sample){
-  print(paste("Renaming PE reads for:", samp))
-  file_1 <- paste0("raw_data/",unlist(strsplit(subset(units,sample==samp)$fq1,split=',')))
-  
-  print(cat("Found",length(file_1),"R1 files for",samp,"\n"))
-  for(i in 1:length(file_1)){
-    if (file.exists(file_1[i])){
-      system(
-      # print(
-        paste0("ln -sr ",file_1[i]," raw_data/", samp,"-", i,"-R1.fastq.gz")
-      )
-      print(cat("R1",file_1[i]," renamed (symlinked)"))
-    } else {
-      stop(paste("Error in mergeLanesAndRename.R: fq1 file for", samp,'(',file_1[i],')', "listed in bin/samples.tsv not present in raw_reads/."))
+rename_fastqs <- function(samplesheet, fastq_dir, samp) {
+    sheet <- read.delim(samplesheet, sep="\t")
+    
+    print(paste("Renaming PE reads for:", samp))
+    
+    # Rename R1 reads
+    file_1 <- paste0(fastq_dir, "/", unlist(strsplit(subset(sheet, sample == samp)$fq1, split = ",")))
+    print(paste("Found", length(file_1), "R1 files for", samp))
+    
+    for (i in 1:length(file_1)) {
+        if (file.exists(file_1[i])) {
+            new_name <- paste0(fastq_dir, "/", samp, "-", i, "-R1.fastq.gz")
+            system(paste0("ln -sr ", file_1[i], " ", new_name))
+            print(paste(file_1[i], "successfully symlinked to", new_name))
+        } else {
+            stop(paste("Error:", file_1[i], "not found in", fastq_dir))
+        }
     }
-  }
-  
-  # merge R2 reads
-  file_2 <- paste0("raw_data/",unlist(strsplit(subset(units,sample==samp)$fq2,split=',')))
-  print(cat("Found",length(file_2),"R2 files for",samp,"\n"))
-  for(i in 1:length(file_2)){
-    if (file.exists(file_2[i])){
-      system(
-      # print(
-        paste0("ln -sr ",file_2[i]," raw_data/", samp,"-", i,"-R2.fastq.gz")
-      )
-      print(cat("R2",file_2[i]," renamed (symlinked)"))
-    } else {
-      stop(paste("Error in mergeLanesAndRename.R: fq2 file for", samp,'(',file_2[i],')', "listed in bin/samples.tsv not present in raw_reads/."))
+    
+    # Rename R2 reads
+    file_2 <- paste0(fastq_dir, "/", unlist(strsplit(subset(sheet, sample == samp)$fq2, split = ",")))
+    print(paste("Found", length(file_2), "R2 files for", samp))
+    
+    for (i in 1:length(file_2)) {
+        if (file.exists(file_2[i])) {
+            new_name <- paste0(fastq_dir, "/", samp, "-", i, "-R2.fastq.gz")
+            system(paste0("ln -sr ", file_2[i], " ", new_name))
+            print(paste(file_2[i], "successfully symlinked to", new_name))
+        } else {
+            stop(paste("Error:", file_2[i], "not found in", fastq_dir))
+        }
     }
-  }
 }
+
+rename_fastqs(snakemake@params[["samplesheet"]], snakemake@params[["fastq_dir"]], snakemake@params[["sample"]])

@@ -7,8 +7,8 @@ from snakemake.utils import validate, min_version
 ##### set minimum snakemake version #####
 min_version("5.20.1")
 
-samples = pd.read_table("bin/samples.tsv", dtype=str).set_index(["sample"], drop=False)
 configfile: "bin/config.yaml"
+samples = pd.read_table(config['samples'], dtype=str).set_index(["sample"], drop=False)
 biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa","fai"]
 wildcard_constraints:
    seqfile_index = '\d+'
@@ -20,7 +20,7 @@ rule all:
         # Download CpG Islands
         # ~ "analysis/cpgIslands/" if config["SubsetToFeatures"]["run"] else [],
         # rename_fastq
-        expand("raw_data/{samples.sample}-1-R1.fastq.gz", samples=samples.itertuples()),
+        expand(f'{config["fastqs"]}/{{samples.sample}}-1-R1.fastq.gz', samples=samples.itertuples()),
         # ~ # biscuit
         expand("analysis/align/{samples.sample}.sorted.markdup.bam", samples=samples.itertuples()),
         # ~ # mergecg
@@ -49,10 +49,14 @@ rule all:
                
 rule get_R1_R2_files:
     output:
-        "raw_data/{sample}-1-R1.fastq.gz", # only require 1 file / sample
-        "raw_data/{sample}-1-R2.fastq.gz",
+        f'{config["fastqs"]}/{{sample}}-1-R1.fastq.gz', # only require 1 file / sample
+        f'{config["fastqs"]}/{{sample}}-1-R2.fastq.gz',
     log:
         "logs/rename/rename_{sample}.log"
+    params:
+        samplesheet = config['samples'],
+        sample = "{sample}",
+        fastq_dir = config['fastqs'],
     threads: 1
     resources:
         mem_gb=8,
@@ -100,12 +104,13 @@ else:
 
 
 def get_trim_reads_index(wildcards): # this is for getting files when there is more than 1 R1 and R2
-    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
+    FILE_INDEX, = glob_wildcards(config['fastqs'] + '/' + wildcards.sample + "-{id}-R1.fastq.gz")
     return list(FILE_INDEX)
     
 def get_trim_reads_input(wildcards):
-    FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
-    files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
+    # TODO: Figure out how to get this to work in one step - need to be able to find the input files without having created them...
+    FILE_INDEX, = glob_wildcards(config['fastqs'] + '/' + wildcards.sample + "-{id}-R1.fastq.gz") # R1 and R2 must be the same
+    files = list(expand(config['fastqs'] + '/' + wildcards.sample + "-{seqfile_index}-R{read}.fastq.gz", seqfile_index = FILE_INDEX, read = [1,2]))
     # ~ return FILE_INDEX
     return files
 
@@ -172,8 +177,8 @@ rule trim_reads:
 if config["run_fastq_screen"]:
     rule fastq_screen:
         input:
-            read1 = "raw_data/{sample}-1-R1.fastq.gz", # ***only the first if there are multiple files***
-            read2 = "raw_data/{sample}-1-R2.fastq.gz",
+            read1 = f'{config["fastqs"]}/{{sample}}-1-R1.fastq.gz', # ***only the first if there are multiple files***
+            read2 = f'{config["fastqs"]}/{{sample}}-1-R2.fastq.gz',
         output:
             "analysis/fastq_screen/{sample}-1-R1_screen.html",
             "analysis/fastq_screen/{sample}-1-R2_screen.html",
@@ -206,22 +211,24 @@ def get_biscuit_align_reference(wildcards):
         return input
 
 def get_rename_fastq_output_R1(wildcards):
+    # TODO: Figure out how to get this to work in one step - need to be able to find the input files without having created them...
     if config["trim_galore"]["trim_before_BISCUIT"]:
         files = "analysis/trim_reads/" + wildcards.sample + "-R1_val_1_merged.fq.gz"
         return files   
     else:
-        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R1.fastq.gz")
-        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R1.fastq.gz", seqfile_index = FILE_INDEX))
+        FILE_INDEX, = glob_wildcards(config['fastqs'] + '/' + wildcards.sample + "-{id}-R1.fastq.gz")
+        files = list(expand(config['fastqs'] + '/' + wildcards.sample + "-{seqfile_index}-R1.fastq.gz", seqfile_index = FILE_INDEX))
         files.sort()
         return files
         
 def get_rename_fastq_output_R2(wildcards):
+    # TODO: Figure out how to get this to work in one step - need to be able to find the input files without having created them...
     if config["trim_galore"]["trim_before_BISCUIT"]:
         files = "analysis/trim_reads/" + wildcards.sample + "-R2_val_2_merged.fq.gz"
         return files   
     else:
-        FILE_INDEX, = glob_wildcards("raw_data/" + wildcards.sample + "-{id}-R2.fastq.gz")
-        files = list(expand("raw_data/" + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
+        FILE_INDEX, = glob_wildcards(config['fastqs'] + '/' + wildcards.sample + "-{id}-R2.fastq.gz")
+        files = list(expand(config['fastqs'] + '/' + wildcards.sample + "-{seqfile_index}-R2.fastq.gz", seqfile_index = FILE_INDEX))
         files.sort()
         return files
 
@@ -559,17 +566,18 @@ rule biscuit_qc:
         """
 
 def get_multiQC_params(wildcards):
+    raw = config['fastqs']
     if config["run_fastq_screen"] and config["trim_galore"]["trim_before_BISCUIT"]:
-        input = "raw_data/ analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen"
+        input = f'{raw} analysis/trim_reads/ analysis/BISCUITqc/ analysis/fastq_screen'
         return input
     elif config["run_fastq_screen"]:
-        input = "raw_data/ analysis/BISCUITqc/ analysis/fastq_screen"
+        input = f'{raw} analysis/BISCUITqc/ analysis/fastq_screen'
         return input
     elif config["trim_galore"]["trim_before_BISCUIT"]:
-        input = "raw_data/ analysis/BISCUITqc/ analysis/trim_reads/"
+        input = f'{raw} analysis/BISCUITqc/ analysis/trim_reads/'
         return input
     else:
-        input = "raw_data/ analysis/BISCUITqc/"
+        input = f'{raw} analysis/BISCUITqc/'
         return input
         
 rule multiQC:
