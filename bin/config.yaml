@@ -13,6 +13,9 @@ fastqs: raw_data
 # Samplesheet for specifying sample names and corresponding FASTQ files, can be absolute path or path relative to Snakefile
 samples: bin/samples.tsv
 
+# Directory for writing analysis/ directory to (if '', write to same directory as Snakefile)
+output_directory: ''
+
 # Turn on/off read trimming, handle additional trim_galore options
 #     trim_before_BISCUIT: run trimming (set as True) or not (set as False)
 #     quality: trim low-quality ends from reads, in addition to adapter removal. Not done unless trim_before_BISCUIT == True
@@ -35,7 +38,7 @@ biscuit:
 # If False - ref['fasta'] will be used as expected
 build_ref_with_methylation_controls: False
 
-# Calculate lambda phage and pUC19 methylation levels and create summary plot (output as analysis/qc_vectors/control_vector_boxplot.pdf)
+# Calculate lambda phage and pUC19 methylation levels and create summary plot (output as <output_directory>/analysis/qc_vectors/control_vector_boxplot.pdf)
 # Only useful if the ref genome included the control vectors with fasta headers >J02459.1 (lamdba / unmethylated control) and >M77789.2 (puc19 / methylated control). 
 # The ref genome can be modified automatically to include these control vectors as the first two contigs by setting config["build_ref_with_methylation_controls"].
 # If True - calculate methylation and create plot
