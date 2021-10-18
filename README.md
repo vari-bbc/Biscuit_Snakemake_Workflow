@@ -75,9 +75,7 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
 
 This workflow comes with a working example dataset. To test the smakemake workflow on your system, place the 10 *_R[12]_fq.gz files in bin/working_example_dataset into raw_data/ and use the default bin/samples.tsv. These example files can be mapped to the human genome.
 
-# Diagrams of possible workflows
-
-## Example workflow - 1 sample
+# Example workflow - 1 sample
 ![workflow diagram](bin/DAGs/dag.png)
 
 
