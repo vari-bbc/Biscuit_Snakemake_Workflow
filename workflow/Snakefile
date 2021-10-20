@@ -7,7 +7,7 @@ from snakemake.utils import validate, min_version
 ##### set minimum snakemake version #####
 min_version("5.20.1")
 
-configfile: "bin/config.yaml"
+configfile: "config/config.yaml"
 samples = pd.read_table(config['samples'], dtype=str).set_index(["sample"], drop=False)
 biscuitIndexFORMATS = ["bis.ann", "bis.amb","par.bwt","dau.bwt","bis.pac","par.sa","dau.sa","fai"]
 wildcard_constraints:
@@ -72,7 +72,7 @@ rule get_R1_R2_files:
         config["envmodules"]["R"],
         config["envmodules"]["snakemake"],
     script:
-        "bin/rename.R"
+        "scripts/rename.R"
 
 if config["build_ref_with_methylation_controls"]:
     assert bool(re.match(".*\.gz$", config["ref"]["fasta"])), "Reference fasta in the config.yaml needs to be gzipped!"  
@@ -268,7 +268,7 @@ if config["SlidingWindow"]["run"]:
             window=(1000 10000 100000 1000000 10000000)
             for i in "${{window[@]}}"
             do
-                ./bin/slidingWindow.pl -indir {params.output_dir}/analysis/pileup/ -windowSize ${{i}} -covFilter {params.covFilter} -out {output.dir}/${{i}}.tsv
+                ./scripts/slidingWindow.pl -indir {params.output_dir}/analysis/pileup/ -windowSize ${{i}} -covFilter {params.covFilter} -out {output.dir}/${{i}}.tsv
             done
             """   
 
@@ -430,7 +430,7 @@ rule biscuit_align:
             touch {output.split_bai}
             touch {output.unmapped}
         else
-            echo "biscuit: biscuit_blaster_version must be v1 or v2 in bin/config.yaml" 2> {log.biscuit_blaster_version}
+            echo "biscuit: biscuit_blaster_version must be v1 or v2 in config/config.yaml" 2> {log.biscuit_blaster_version}
         fi
         """
         
@@ -683,7 +683,7 @@ if config["control_vectors"]:
         log:
            control_vector_pdf = f"{output_directory}/logs/qc_vectors/control_vector_pdf.log",
         script:
-            "bin/control_vector.R"       
+            "scripts/control_vector.R"       
        
 if config["generate_snps"] or config["epiread"]:
     rule biscuit_snps:

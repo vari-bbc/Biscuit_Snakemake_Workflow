@@ -11,7 +11,7 @@ ref:
 fastqs: raw_data
 
 # Samplesheet for specifying sample names and corresponding FASTQ files, can be absolute path or path relative to Snakefile
-samples: bin/samples.tsv
+samples: config/samples.tsv
 
 # Directory for writing analysis/ directory to (if '', write to same directory as Snakefile)
 output_directory: ''
@@ -83,7 +83,7 @@ envmodules:
     R: bbc/R/R-4.1.0
     snakemake: bbc/snakemake/snakemake-6.1.0
     trim_galore: bbc/trim_galore/trim_galore-0.6.0
-    biscuit: bbc/biscuit/biscuit_1_0_0
+    #biscuit: bbc/biscuit/biscuit_1_0_0
     samblaster: bbc/samblaster/samblaster-0.1.26
     htslib: bbc/htslib/htslib-1.12
     bedtools: bbc/bedtools/bedtools-2.29.2
@@ -98,7 +98,7 @@ envmodules:
     #~ R: NULL
     #~ snakemake: NULL
     #~ trim_galore: NULL
-    #~ biscuit: NULL
+    biscuit: "NULL"
     #~ htslib: NULL
     #~ bedtools: NULL
     #~ fastqc: NULL
