@@ -53,10 +53,15 @@ is_nome: False
 # Run fastq_screen on data
 # If True - run fastq_screen with --bisulfite mode (uses Bismark)
 # If False - skip this step
-run_fastq_screen: False # run fastq_screen with --bisulfite mode (uses Bismark)
+run_fastq_screen: False
 
 # fastq_screen configure file path passed to --conf in fastq_screen
 fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_20200309/FastQ_Screen_Genomes_Bisulfite/fastq_screen.conf
+
+# Run preseq on data
+# If True - run preseq
+# If False - skip this step
+preseq: False
 
 # Call SNPs with BISCUIT (True) or not (False)?
 generate_snps: False
@@ -83,8 +88,9 @@ envmodules:
     R: bbc/R/R-4.1.0
     snakemake: bbc/snakemake/snakemake-6.1.0
     trim_galore: bbc/trim_galore/trim_galore-0.6.0
-    #biscuit: bbc/biscuit/biscuit_1_0_0
+    biscuit: bbc/biscuit/biscuit_1_0_0
     samblaster: bbc/samblaster/samblaster-0.1.26
+    preseq: bbc/preseq/preseq-3.1.2
     htslib: bbc/htslib/htslib-1.12
     bedtools: bbc/bedtools/bedtools-2.29.2
     fastqc: bbc/fastqc/fastqc-0.11.9
@@ -94,19 +100,21 @@ envmodules:
     fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
     bismark: bbc/bismark/bismark-0.23.0
     # if you e.g. don't have a module system then put the envmodules as follows:
-    #~ samtools: NULL
-    #~ R: NULL
-    #~ snakemake: NULL
-    #~ trim_galore: NULL
-    biscuit: "NULL"
-    #~ htslib: NULL
-    #~ bedtools: NULL
-    #~ fastqc: NULL
-    #~ multiqc: NULL
-    #~ parrallel: NULL
-    #~ pigz: NULL
-    #~ fastq_screen: NULL
-    #~ bismark: NULL
+    #~ samtools: "NULL"
+    #~ R: "NULL"
+    #~ snakemake: "NULL"
+    #~ trim_galore: "NULL"
+    #~ biscuit: "NULL"
+    #~ samblaster: "NULL"
+    #~ preseq: "NULL"
+    #~ htslib: "NULL"
+    #~ bedtools: "NULL"
+    #~ fastqc: "NULL"
+    #~ multiqc: "NULL"
+    #~ parallel: "NULL"
+    #~ pigz: "NULL"
+    #~ fastq_screen: "NULL"
+    #~ bismark: "NULL"
 
 # Memory and Thread parameters used when running on a cluster
 #     maxThreads: number of threads to run biscuit align with
