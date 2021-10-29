@@ -16,6 +16,16 @@ samples: config/samples.tsv
 # Directory for writing analysis/ directory to (if '', write to same directory as Snakefile)
 output_directory: ''
 
+# Create BISCUITqc assets, CpG seascape (islands, shores, shelves, and open seas), and genomic feature BED files
+#     run: run if True (output will be in a directory called assets/), skip if False
+#     genome: genome to create files for (possible choices: 'hg38', 'hg19', 'mm10', 'mm9')
+# While the BISCUITqc asset files are readily availabe on GitHub, the seascape and genomic features need to be generated
+# from various annotation files from UCSC and GENCODE. You are welcome to create these yourself (using the naming scheme
+# seen in workflow/rules/create_assets.smk) and point to them in obs_exp['assets']
+create_assets:
+    run: False
+    genome: 'hg38'
+
 # Turn on/off read trimming, handle additional trim_galore options
 #     trim_before_BISCUIT: run trimming (set as True) or not (set as False)
 #     quality: trim low-quality ends from reads, in addition to adapter removal. Not done unless trim_before_BISCUIT == True
@@ -32,6 +42,26 @@ biscuit:
     biscuit_blaster_version: v1
     lib_type: 0
 
+# Input data is from NOMe-seq
+# If True - data is NOMe-seq data
+# If False - data is WGBS or EM-seq
+is_nome: False
+
+# Inputs to SAM read group in biscuit align
+#     PL: platform/technology entry
+#     PU: platform unit entry
+#     LB: library preparation entry
+sam_header:
+    PL: il
+    PU: nv
+    LB: b1
+
+# Call SNPs with BISCUIT (True) or not (False)?
+generate_snps: False
+
+# Create epiBED files (True) or not (False)? Sets generate_snps to True if epiread is True
+epiread: False
+
 # Create a joint reference with ref['fasta'], lambda phage, and pUC19 genomes (lambda phage and pUC19 genomes proved in bin/)
 # Lambda phage and pUC19 control vectors are only included in Illumina's NEBNext® Enzymatic Methyl-seq Kit
 # If True - create a joint reference and use this as reference during alignment and further processing
@@ -44,11 +74,6 @@ build_ref_with_methylation_controls: False
 # If True - calculate methylation and create plot
 # If False - skip this step
 control_vectors: False
-
-# Input data is from NOMe-seq
-# If True - data is NOMe-seq data
-# If False - data is WGBS or EM-seq
-is_nome: False
 
 # Run fastq_screen on data
 # If True - run fastq_screen with --bisulfite mode (uses Bismark)
@@ -63,20 +88,12 @@ fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_2020
 # If False - skip this step
 preseq: False
 
-# Call SNPs with BISCUIT (True) or not (False)?
-generate_snps: False
-
-# Create epiBED files (True) or not (False)? Sets generate_snps to True if epiread is True
-epiread: False
-
-# Inputs to SAM read group in biscuit align
-#     PL: platform/technology entry
-#     PU: platform unit entry
-#     LB: library preparation entry
-sam_header:
-    PL: il
-    PU: nv
-    LB: b1
+# Calculate the ratio observed/expected coverage based on bismap results for different genomic features
+# run - create obs/exp plots if True, skip if False
+# assets - directory where asset files live (set create_assets['run'] to True if you don't have these files already)
+obs_exp:
+    run: False
+    assets: assets/hg38
 
 # Environment modules paths used in "module load <string>" (pending you have a module system available)
 # If your system does not use environmental modules, then executables for all of the modules must be in your PATH and
@@ -88,7 +105,7 @@ envmodules:
     R: bbc/R/R-4.1.0
     snakemake: bbc/snakemake/snakemake-6.1.0
     trim_galore: bbc/trim_galore/trim_galore-0.6.0
-    biscuit: bbc/biscuit/biscuit_1_0_0
+    biscuit: bbc/biscuit/biscuit_1_0_1
     samblaster: bbc/samblaster/samblaster-0.1.26
     preseq: bbc/preseq/preseq-3.1.2
     htslib: bbc/htslib/htslib-1.12
@@ -148,8 +165,3 @@ walltime:
 SlidingWindow:
     run: False
     covFilter: 10
-
-# Subset merged BED and epiBED files to genomic features, including, CpG islands, shores, shelves, and open seas
-#     run: subset BEDs (True) or skip (False)
-SubsetToFeatures:
-    run: True
