@@ -3,6 +3,7 @@
 #
 # output_directory - workflow/Snakefile
 # config           - workflow/Snakefile
+# SAMPLES          - workflow/Snakefile
 #
 ###-----------------------------------------------------------------------------------------------------------------###
 
