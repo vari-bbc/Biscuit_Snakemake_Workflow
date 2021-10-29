@@ -1,6 +1,9 @@
 # Ignore analysis/ directory files
 analysis/
 
+# Ignore assets/ directory files
+assets/
+
 # Ignore .snakemake/ directory
 .snakemake
 
