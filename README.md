@@ -32,8 +32,6 @@ Many options can be easily specified in the config.yaml! Otherwise, the commands
  + fastq_screen (only required if running fastq_screen)
  + fastQC
  + multiQC
- + parallel
-
 
 # Running the workflow
 
