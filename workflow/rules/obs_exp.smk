@@ -24,6 +24,7 @@ rule obs_exp_coverage_genomecov:
         walltime = config['walltime']['medium'],
     envmodules:
         config['envmodules']['bedtools'],
+        config['envmodules']['samtools'],
     shell:
         """
         set +o pipefail
