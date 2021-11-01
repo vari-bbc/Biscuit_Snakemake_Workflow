@@ -95,6 +95,13 @@ obs_exp:
     run: False
     assets: assets/hg38
 
+# Find some CpG statistics not found elsewhere (% covered, CpG island coverage)
+# run - create CpG stats plots if True, skip if False
+# assets - directory where asset files live (set create_assets['run'] to True if you don't have these files already)
+cpg_stats:
+    run: False
+    assets: assets/hg38
+
 # Environment modules paths used in "module load <string>" (pending you have a module system available)
 # If your system does not use environmental modules, then executables for all of the modules must be in your PATH and
 # each tool should be set to NULL (as shown below).

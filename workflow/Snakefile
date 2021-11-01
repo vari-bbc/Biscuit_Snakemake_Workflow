@@ -72,8 +72,14 @@ rule all:
         expand(
             f'{output_directory}/analysis/obs_exp/obs_exp_{{type}}.pdf',
             type=['cpgs', 'cgis', 'exon', 'gene', 'intr', 'rmsk']
-        ) if config['obs_exp']['run'] else '',
+        ) if config['obs_exp']['run'] else [],
 
+        # CpG coverage stats
+        expand(
+            f'{output_directory}/analysis/cpg_stats/feature_{{type}}.pdf',
+            type=['all_cpgs', 'cpg_islands', 'exon_cpgs', 'gene_cpgs', 'repeat_cpgs']
+        ) if config['cpg_stats']['run'] else [],
+        f'{output_directory}/analysis/cpg_stats/cgi_stats.pdf' if config['cpg_stats']['run'] else [],
 
 # Rules for preprocessing files
 include:
@@ -90,6 +96,8 @@ include:
 # Rules for other QC things
 include:
     'rules/obs_exp.smk'
+include:
+    'rules/cpg_stats.smk'
 
 # Rules for creating assets
 include:
