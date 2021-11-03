@@ -96,18 +96,18 @@ rule biscuit_align:
             biscuit align -@ {threads} -b {params.lib_type} \
                 -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
                 {input.reference} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
-            samblaster -r --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
+            samblaster --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
             samtools sort --write-index -@ {threads} -m 5G -o {output.bam}##idx##{output.bai} -O BAM - 2> {log.samtools_sort}
 
             # Get some initial stats
             samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
 
             # Sort, compress, and index discordant read file
-            samtools sort --write-index -@ {threads} -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
+            samtools sort --write-index -@ {threads} -o {output.disc}##idx##{output.disc_bai} -O BAM {params.disc} 2> {log.sort_disc}
             #samtools index -@ {threads} {output.disc} 2> {log.index_disc}
 
             # Sort, compress, and index split read file
-            samtools sort --write-index -@ {threads} -o {output.split} -O BAM {params.split} 2> {log.sort_split}
+            samtools sort --write-index -@ {threads} -o {output.split}##idx##{output.split_bai} -O BAM {params.split} 2> {log.sort_split}
             #samtools index -@ {threads} {output.split} 2> {log.index_split}
 
             # Compress unmapped/clipped FASTQ
@@ -126,7 +126,7 @@ rule biscuit_align:
             biscuit align -@ {threads} -b {params.lib_type} \
                 -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
                 {input.reference} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
-            samblaster -r --addMateTags 2> {log.samblaster} | \
+            samblaster --addMateTags 2> {log.samblaster} | \
             samtools sort --write-index -@ {threads} -m 5G -o {output.bam}##idx##{output.bai} -O BAM - 2> {log.samtools_sort}
 
             # Get some initial stats
