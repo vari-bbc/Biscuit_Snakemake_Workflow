@@ -67,10 +67,10 @@ rule preseq:
     input:
         bam = f'{output_directory}/analysis/align/{{sample}}.sorted.markdup.bam',
     output:
-        tsv = f'{output_directory}/analysis/preseq/{{sample}}.lc_extrap.ccurve.txt',
+        tsv = f'{output_directory}/analysis/preseq/{{sample}}.ccurve.txt',
     params:
         dir = f'{output_directory}/analysis/preseq',
-        out = f'{output_directory}/analysis/preseq/{{sample}}.lc_extrap.ccurve.txt',
+        out = f'{output_directory}/analysis/preseq/{{sample}}.ccurve.txt',
     log:
         f'{output_directory}/logs/preseq/{{sample}}.log',
     benchmark:
@@ -84,13 +84,13 @@ rule preseq:
     shell:
         """
         mkdir -p {params.dir}
-        preseq lc_extrap -o {params.out} -e 1E8 -P {input.bam} 2> {log}
+        preseq c_curve -o {params.out} -P {input.bam} 2> {log}
         """
 
 def get_multiQC_params(wildcards):
     raw = config['fastqs']
     out = output_directory
-    indirs = f'{raw} {out}/analysis/BISCUITqc {out}/analysis/raw_fastqc'
+    indirs = f'{raw} {out}/analysis/BISCUITqc {out}/analysis/raw_fastqc {out}/analysis/align'
     if config['run_fastq_screen']:
         indirs += f' {out}/analysis/fastq_screen' # space needed at beginning to separate directories
     if config['trim_galore']['trim_before_BISCUIT']:
@@ -103,6 +103,8 @@ rule multiQC:
     input:
         # raw fastqc
         expand(f'{output_directory}/analysis/raw_fastqc/{{samples.sample}}-1-R{{read}}_fastqc.zip', read=[1,2], samples=SAMPLES.itertuples()),
+        # flagstat
+        expand(f'{output_directory}/analysis/align/{{samples.sample}}.sorted.markdup.bam.flagstat', samples=SAMPLES.itertuples()),
         # biscuit_qc
         expand(f'{output_directory}/analysis/BISCUITqc/{{samples.sample}}_covdist_all_base_botgc_table.txt', samples=SAMPLES.itertuples()),
         expand(f'{output_directory}/analysis/BISCUITqc/{{samples.sample}}_covdist_all_base_table.txt', samples=SAMPLES.itertuples()),
@@ -122,7 +124,7 @@ rule multiQC:
         # trim_galore
         expand(f'{output_directory}/analysis/trim_reads/{{samples.sample}}-R{{read}}_val_{{read}}_merged.fq.gz', read=[1,2], samples=SAMPLES.itertuples()) if config['trim_galore']['trim_before_BISCUIT'] else [],
         # preseq
-        expand(f'{output_directory}/analysis/preseq/{{samples.sample}}.lc_extrap.ccurve.txt', samples=SAMPLES.itertuples()) if config['preseq'] else [],
+        expand(f'{output_directory}/analysis/preseq/{{samples.sample}}.ccurve.txt', samples=SAMPLES.itertuples()) if config['preseq'] else [],
     output:
         directory(f'{output_directory}/analysis/multiqc/multiqc_report_data',),
         f'{output_directory}/analysis/multiqc/multiqc_report.html',
