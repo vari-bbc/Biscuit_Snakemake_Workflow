@@ -79,6 +79,8 @@ rule biscuit_align:
     resources:
         mem_gb = config['hpcParameters']['maxMemoryGb'],
         walltime = config['walltime']['long'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['samtools'],
@@ -172,6 +174,8 @@ rule biscuit_pileup:
         walltime = config['walltime']['medium'],
     wildcard_constraints:
         sample = '.*[^(_mergecg)]',
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['htslib'],
@@ -213,6 +217,8 @@ rule biscuit_mergecg:
         walltime = config['walltime']['medium'],
     wildcard_constraints:
         sample = '.*[^(_mergecg)]'
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['htslib'],
@@ -245,6 +251,8 @@ rule biscuit_snps:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['htslib'],
@@ -275,6 +283,8 @@ rule biscuit_epiread:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['htslib'],

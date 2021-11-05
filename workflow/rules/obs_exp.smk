@@ -22,6 +22,8 @@ rule obs_exp_coverage_genomecov:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
         config['envmodules']['samtools'],
@@ -51,6 +53,8 @@ rule obs_exp_coverage_genomecov_cpg:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -76,6 +80,8 @@ rule obs_exp_coverage_genomecov_cgi:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -101,6 +107,8 @@ rule obs_exp_coverage_genomecov_intergenic:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -126,6 +134,8 @@ rule obs_exp_coverage_genomecov_exon:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -151,6 +161,8 @@ rule obs_exp_coverage_genomecov_genic:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -176,6 +188,8 @@ rule obs_exp_coverage_genomecov_rmsk:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -201,6 +215,8 @@ rule obs_exp_coverage_genomecov_mapped:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -238,6 +254,8 @@ rule obs_exp_coverage_values:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/python_packages.yaml'
     script:
         '../scripts/calculate_feature_sizes.py'
 
@@ -268,5 +286,7 @@ rule obs_exp_coverage_plot:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/python_packages.yaml'
     script:
         '../scripts/plot_obs_exp.py'

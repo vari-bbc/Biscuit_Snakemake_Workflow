@@ -44,6 +44,8 @@ rule biscuit_qc:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['biscuit'],
         config['envmodules']['bedtools'],
@@ -79,6 +81,8 @@ rule preseq:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/preseq.yaml'
     envmodules:
         config['envmodules']['preseq'],
     shell:
@@ -98,7 +102,7 @@ def get_multiQC_params(wildcards):
     if config['preseq']:
         indirs += f' {out}/analysis/preseq' # space needed at beginning to separate directories
     return indirs
-        
+
 rule multiQC:
     input:
         # raw fastqc
@@ -139,6 +143,8 @@ rule multiQC:
     resources:
         mem_gb=8,
         walltime = config['walltime']['medium']
+    conda:
+        '../envs/python_packages.yaml'
     envmodules:
         config['envmodules']['multiqc'],
     shell:
@@ -146,3 +152,21 @@ rule multiQC:
         multiqc -f -o {params.output_dir} -n multiqc_report.html {params.mqc_dirs} 2> {log}
         """
 
+rule percent_covered:
+    input:
+        all = expand(f'{output_directory}/analysis/BISCUITqc/{{samples.sample}}_covdist_all_base_table.txt', samples=SAMPLES.itertuples()),
+        q40 = expand(f'{output_directory}/analysis/BISCUITqc/{{samples.sample}}_covdist_q40_base_table.txt', samples=SAMPLES.itertuples()),
+    output:
+        out = f'{output_directory}/analysis/percent_genome_covered.pdf',
+    log:
+        f'{output_directory}/logs/percent_covered.log',
+    benchmark:
+        f'{output_directory}/benchmarks/percent_covered.txt',
+    threads: 1
+    resources:
+        mem_gb=8,
+        walltime = config['walltime']['short'],
+    conda:
+        '../envs/python_packages.yaml'
+    script:
+        '../scripts/plot_percent_covered.py'

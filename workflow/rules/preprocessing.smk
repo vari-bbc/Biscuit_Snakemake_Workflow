@@ -18,8 +18,9 @@ checkpoint rename_fastq_files:
     resources:
         mem_gb = config['hpcParameters']['smallMemoryGb'],
         walltime = config['walltime']['short'],
+    conda:
+        '../envs/r.yaml'
     envmodules:
-        config['envmodules']['snakemake'],
         config['envmodules']['R'],
     script:
         '../scripts/rename.R'
@@ -49,6 +50,8 @@ rule raw_fastqc:
         stderr = f'{output_directory}/logs/raw_fastqc/{{sample}}.e',
     benchmark:
         f'{output_directory}/benchmarks/raw_fastqc/{{sample}}.txt',
+    conda:
+        '../envs/babraham.yaml'
     envmodules:
         config['envmodules']['fastqc'],
     threads: config['hpcParameters']['trimThreads'],
@@ -69,13 +72,14 @@ rule trim_reads:
         f'{output_directory}/analysis/trim_reads/{{sample}}-R2_val_2_merged.fq.gz',
     params:
         outdir = f'{output_directory}/analysis/trim_reads',
-        quality = config['trim_galore']['quality'],
-        hard_trim_R2 = config['trim_galore']['hard_trim_R2'],
+        args_list = config['trim_galore']['args_list'],
     log:
         stdout = f'{output_directory}/logs/trim_reads/{{sample}}.o',
         stderr = f'{output_directory}/logs/trim_reads/{{sample}}.e',
     benchmark:
         f'{output_directory}/benchmarks/trim_reads/{{sample}}.txt',
+    conda:
+        '../envs/babraham.yaml'
     envmodules:
         config['envmodules']['trim_galore'],
         config['envmodules']['fastqc'],
@@ -85,26 +89,14 @@ rule trim_reads:
         walltime = config['walltime']['medium'],
     shell:
         """
-        if [ {params.hard_trim_R2} -ge 1 ]; then
-            trim_galore \
-                --paired \
-                {input} \
-                --output_dir {params.outdir} \
-                --clip_R2 {params.hard_trim_R2} \
-                --cores {threads} \
-                -q {params.quality} \
-                --fastqc \
-                2> {log.stderr} 1> {log.stdout}
-        else
-            trim_galore \
-                --paired \
-                {input} \
-                --output_dir {params.outdir} \
-                --cores {threads} \
-                -q {params.quality} \
-                --fastqc \
-                2> {log.stderr} 1> {log.stdout}
-        fi
+        trim_galore \
+            --paired \
+            {input} \
+            --output_dir {params.outdir} \
+            --cores {threads} \
+            --fastqc \
+            {params.args_list} \
+            2> {log.stderr} 1> {log.stdout}
 
         # Create merged R1 and R2 FASTQs, clean up files that were merged
         cat {params.outdir}/{wildcards.sample}-*-R1_val_1.fq.gz > {params.outdir}/{wildcards.sample}-R1_val_1_merged.fq.gz
@@ -132,7 +124,9 @@ rule fastq_screen:
     resources:
         nodes = 1,
         mem_gb = 64,
-        walltime = config['walltime']['medium']
+        walltime = config['walltime']['medium'],
+    conda:
+        '../envs/babraham.yaml'
     envmodules: 
         config['envmodules']['fastq_screen'],
         config['envmodules']['bismark'],

@@ -23,6 +23,8 @@ rule cpg_stats_genomecov:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
         config['envmodules']['samtools'],
@@ -66,6 +68,8 @@ rule cpg_stats_feature_table:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -126,6 +130,8 @@ rule cpg_stats_cgi_table:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -166,6 +172,8 @@ rule cpg_stats_feature_plot:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/python_packages.yaml'
     script:
         '../scripts/plot_cpg_stats_features.py'
 
@@ -191,5 +199,7 @@ rule cpg_stats_cgi_plot:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
+    conda:
+        '../envs/python_packages.yaml'
     script:
         '../scripts/plot_cpg_stats_cgi.py'

@@ -35,15 +35,15 @@ if [[ ${CONF_output_directory} == "" ]]; then
 fi
 mkdir -p ${CONF_output_directory}/logs/runs
 
-module load bbc/snakemake/snakemake-6.1.0
-
 # save DAG job file with time stamp
 TIME=$(date "+%Y-%m-%d_%H.%M.%S")
 snakemake --use-envmodules -n > ${CONF_output_directory}/logs/runs/workflow_${TIME}.txt
 snakemake --dag | dot -Tpng > ${CONF_output_directory}/logs/runs/workflow_${TIME}.png
 
+# Default to using conda, if using environment modules, then replace --use-conda with --use-envmodules
+# Note, this requires downloading mamba (conda install -n base -c conda-forge mamba)
 snakemake \
-    --use-envmodules \
+    --use-conda \
     --jobs 20 \
     --cluster "qsub \
     -V \

@@ -59,6 +59,8 @@ rule general_assets:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium']
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
         config['envmodules']['biscuit'],
@@ -196,6 +198,8 @@ rule bismap_assets:
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium']
+    conda:
+        '../envs/biscuit.yaml'
     envmodules:
         config['envmodules']['bedtools'],
     shell:
@@ -205,7 +209,6 @@ rule bismap_assets:
         #cd {params.dir}
 
         wget -P {params.dir} --no-check-certificate -q https://bismap.hoffmanlab.org/raw/{params.gen}/k100.bismap.bedgraph.gz
-        #mv k100.bismap.bedgraph.gz {params.dir}
 
         bedtools intersect -a {output.bis} -b {input.cpg} | gzip -c > {output.cpg}
         bedtools intersect -a {output.bis} -b {input.cgi} | gzip -c > {output.cgi}

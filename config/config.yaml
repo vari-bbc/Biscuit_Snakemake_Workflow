@@ -28,12 +28,11 @@ create_assets:
 
 # Turn on/off read trimming, handle additional trim_galore options
 #     trim_before_BISCUIT: run trimming (set as True) or not (set as False)
-#     quality: trim low-quality ends from reads, in addition to adapter removal. Not done unless trim_before_BISCUIT == True
-#     hard_trim_R2: --clip_R2 <int> argument from trim_galore. Must be integer. For swift kit, set this to 14 or 15. Not done unless trim_before_BISCUIT == True
+#     args_list: additonal arguments to pass to trim_galore (note --paired, --fastqc, --cores, and --output_dir are always included), '' will not include any extra arguments
+#         Note, when processing data generated with the Adaptase module, it is highly suggested to set args_list: '--clip_R2 15'
 trim_galore:
     trim_before_BISCUIT: False
-    quality: 30
-    hard_trim_R2: 15
+    args_list: ''
 
 # BISCUIT alignment options
 #     biscuit_blaster_version: version of biscuitBlaster to run (specify either v1 or v2)

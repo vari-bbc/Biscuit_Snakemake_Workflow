@@ -66,6 +66,7 @@ rule all:
         ## Do post-processing QC
         # MultiQC
         f'{output_directory}/analysis/multiqc/multiqc_report.html',
+        f'{output_directory}/analysis/percent_genome_covered.pdf',
 
         ## Run any other QC steps
         # Observed / Expected coverage
