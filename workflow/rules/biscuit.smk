@@ -72,7 +72,7 @@ def get_rename_fastq_output_R2(wildcards):
         files.sort()
         return files
 
-rule biscuit_align:
+rule biscuit_blaster:
     input:
         reference = get_biscuit_reference,
         R1 = get_rename_fastq_output_R1,
