@@ -99,7 +99,7 @@ rule biscuit_blaster:
         unmapped = f'{output_directory}/analysis/align/{{sample}}.unmapped.fastq',
         biscuit_version = config['biscuit']['biscuit_blaster_version'],
     log:
-        biscuit = f'{output_directory}/logs/biscuit/biscuit_align.{{sample}}.log',
+        biscuit = f'{output_directory}/logs/biscuit/biscuit_blaster.{{sample}}.log',
         biscuit_blaster_version = f'{output_directory}/logs/biscuit/blaster_version.{{sample}}.log',
         samblaster = f'{output_directory}/logs/biscuit/samblaster.{{sample}}.log',
         samtools_view = f'{output_directory}/logs/biscuit/samtools_view.{{sample}}.log',
@@ -112,7 +112,7 @@ rule biscuit_blaster:
         index_split = f'{output_directory}/logs/biscuit/index_split.{{sample}}.log',
         bgzip_unmapped = f'{output_directory}/logs/biscuit/bgzip_unmapped.{{sample}}.log',       
     benchmark:
-        f'{output_directory}/benchmarks/biscuit_align/{{sample}}.txt'
+        f'{output_directory}/benchmarks/biscuit_blaster/{{sample}}.txt'
     threads: config['hpcParameters']['maxThreads']
     resources:
         mem_gb = config['hpcParameters']['maxMemoryGb'],
