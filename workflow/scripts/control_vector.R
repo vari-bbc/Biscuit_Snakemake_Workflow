@@ -3,13 +3,13 @@ require(ggplot2)
 require(patchwork)
 require(viridisLite)
 
-import_data <- function(files) {
+import_data <- function(files, logfile) {
     df <- NULL
 
     for (f in files) {
         if (file.info(f)$size > 0) {
             name <- gsub("\\.bed", "", basename(f))
-            print(cat("Loading", f, name, "\n"))
+            cat("Loading", f, "as", name, "\n", file=logfile, append=TRUE)
 
             my_bed <- read.delim(f, sep="\t", header=FALSE)
             colnames(my_bed) <- c("chr", "start", "end", "beta", "depth", "context")
@@ -22,20 +22,17 @@ import_data <- function(files) {
     return(df)
 }
 
-create_plot <- function(lam_files, puc_files, out_files) {
-    lam <- import_data(lam_files)
-    puc <- import_data(puc_files)
-    print(lam)
-    print(puc)
+create_plot <- function(lam_files, puc_files, out_files, log_file) {
+    cat("Loading data\n", file=log_file)
+    lam <- import_data(lam_files, log_file)
+    puc <- import_data(puc_files, log_file)
 
     n_samples_l <- length(unique(lam$sample))
     n_samples_p <- length(unique(puc$sample))
-    print(n_samples_l)
-    print(n_samples_p)
 
     # Unmethylated control
     if (!is.null(lam)) {
-        cat("making lambda plots\n")
+        cat("lambda phage data found. making lambda plots\n", file=log_file, append=TRUE)
         topleft <- ggplot(lam, aes(x=sample, y=depth)) +
             geom_boxplot(color='#357BA2FF') +
             theme_bw() +
@@ -48,6 +45,7 @@ create_plot <- function(lam_files, puc_files, out_files) {
             ) +
             scale_color_manual() +
             ggtitle("Unmethylated", subtitle=paste("N =", n_samples_l, "Samples")) +
+            expand_limits(y=0) +
             ylab("Coverage") +
             xlab("")
 
@@ -55,7 +53,7 @@ create_plot <- function(lam_files, puc_files, out_files) {
             geom_boxplot(color='#357BA2FF') +
             theme_bw() +
             theme(
-                axis.text.x = element_blank(),
+                axis.text.x = element_text(size=12, angle=45, hjust=1, vjust=1),
                 axis.text.y = element_text(size=12),
                 axis.title.y = element_text(size=25),
                 plot.title = element_text(size=25, hjust=0.5),
@@ -69,7 +67,7 @@ create_plot <- function(lam_files, puc_files, out_files) {
 
     # Methylated control
     if (!is.null(puc)) {
-        cat("making puck plots\n")
+        cat("pUC19 data found. making puc19 plots\n", file=log_file, append=TRUE)
         topright <- ggplot(puc, aes(x=sample, y=depth)) +
             geom_boxplot(color='#357BA2FF') +
             theme_bw() +
@@ -82,6 +80,7 @@ create_plot <- function(lam_files, puc_files, out_files) {
             ) +
             scale_color_manual() +
             ggtitle("Methylated", subtitle=paste("N =", n_samples_p, "Samples")) +
+            expand_limits(y=0) +
             ylab("") +
             xlab("")
 
@@ -89,7 +88,7 @@ create_plot <- function(lam_files, puc_files, out_files) {
             geom_boxplot(color='#357BA2FF') +
             theme_bw() +
             theme(
-                axis.text.x = element_blank(),
+                axis.text.x = element_text(size=12, angle=45, hjust=1, vjust=1),
                 axis.text.y = element_text(size=12),
                 axis.title.y = element_text(size=25),
                 plot.title = element_text(size=25, hjust=0.5),
@@ -103,21 +102,21 @@ create_plot <- function(lam_files, puc_files, out_files) {
 
     # Create plot
     if (exists("topleft") & exists("topright")) {
-        cat("trying to make patchwork plot\n")
-        layout <- '
+        cat("found plots for both lambda phage and pUC19. attempting to make patchwork plot\n", file=log_file, append=TRUE)
+        layout <- "
         AB
         CD
-        '
+        "
 
-        pdf(file=out_files, width=7, height=10)
+        pw <- topleft + topright + bottomleft + bottomright +
+            patchwork::plot_layout(design = layout) +
+            patchwork::plot_annotation(tag_levels = "A", title = "Control Vectors") &
+            theme(plot.tag = element_text(face = "bold")) &
+            theme(plot.title = element_text(size=25, hjust=0.5))
 
-        topleft + topright + bottomleft + bottomright +
-            patchwork::plot_annotation(tag_levels = 'A', title = 'Control Vectors') +
-            patchwork::plot_layout(design = layout) & theme(plot.tag = element_text(face = 'bold')) & theme(plot.title = element_text(size=25, hjust=0.5))
-
-        dev.off()
+        ggsave(out_files, plot=pw, width=7, height=10)
     } else {
-        cat("trying to make unfilled plot\n")
+        cat("could not find plots for both lambda phage and pUC19. filling placeholder file\n", file=log_file, append=TRUE)
         pdf(file=out_files, width=7, height=10)
 
         plot.new()
@@ -127,4 +126,4 @@ create_plot <- function(lam_files, puc_files, out_files) {
     }
 }
 
-create_plot(snakemake@input[["lambda_files"]], snakemake@input[["puc19_files"]], snakemake@output[["pdf"]])
+create_plot(snakemake@input[["lambda_files"]], snakemake@input[["puc19_files"]], snakemake@output[["pdf"]], snakemake@log[["fn"]])

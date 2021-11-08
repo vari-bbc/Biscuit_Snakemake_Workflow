@@ -214,9 +214,9 @@ if config['control_vectors']:
         output:
             pdf = f'{output_directory}/analysis/qc_vectors/control_vector_boxplot.pdf',
         log:
-            f'{output_directory}/logs/qc_vectors/control_vector_boxplot.log',
+            fn = f'{output_directory}/logs/qc_vectors/control_vector_boxplot.log',
         benchmark:
-            f'{output_directory}/benchmarks/qc_vectors/control_vector_boxplot.log',
+            f'{output_directory}/benchmarks/qc_vectors/control_vector_boxplot.txt',
         threads: 1
         resources:
             mem_gb=32,
