@@ -102,7 +102,7 @@ This workflow comes with a working example dataset. To test the smakemake workfl
 FASTQ files in `bin/working_example_dataset` into `raw_data/` and use the default `config/samples.tsv` sample sheet.
 These example files can be mapped to the human genome.
 
-# Example workflow - 1 sample
+# Example default workflow - 1 sample
 ![workflow diagram](bin/DAGs/dag.png)
 
 

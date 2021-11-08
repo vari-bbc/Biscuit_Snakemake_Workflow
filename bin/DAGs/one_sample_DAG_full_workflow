@@ -1,44 +1,100 @@
 digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
-    edge[penwidth=5, color=grey];
-	0[label = "all", color = "0 0 0", style="rounded"];
-	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "build_ref_with_methylation_controls", color = "0 0 0", style="rounded,dashed"];
-	5[label = "trim_galore", color = "0 0 0", style="rounded"];
-	6[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
-	7[label = "multiQC", color = "0 0 0", style="rounded"];
-	8[label = "fastq_screen", color = "0 0 0", style="rounded,dashed"];
-	9[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	10[label = "methylation_controls_qc", color = "0 0 0", style="rounded,dashed"];
-	11[label = "methylation_controls_figure", color = "0 0 0", style="rounded,dashed"];
-	12[label = "biscuit_snps", color = "#FF0000", style="rounded,dashed"];
-	13[label = "biscuit_epiread", color = "#FF0000", style="rounded,dashed"];
+    edge[penwidth=2, color=grey];
+	0[label = < <B>all</B> >, color = black, style="rounded"];
+	1[label = < <B>build_ref_with_methylation_controls</B> >, color = black, style="rounded,dashed"];
+	2[label = < <B>bismap_assets</B> >, color = black, style="rounded,dashed"];
+	3[label = < <B>general_assets</B> >, color = black, style="rounded,dashed"];
+	4[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	5[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	6[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	7[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	8[label = < <B>multiQC</B> >, color = black, style="rounded"];
+	9[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	10[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	11[label = < <B>percent_covered</B> >, color = black, style="rounded"];
+	12[label = < <B>obs_exp_coverage_plot</B> >, color = black, style="rounded,dashed"];
+	13[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	14[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	15[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	16[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	17[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	18[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	19[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	20[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	21[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	22[label = < <B>cpg_stats_feature_plot</B> >, color = black, style="rounded,dashed"];
+	23[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	24[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	25[label = < <B>cpg_stats_cgi_plot</B> >, color = black, style="rounded,dashed"];
+	26[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	27[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	28[label = < <B>methylation_controls_figure</B> >, color = black, style="rounded,dashed"];
+	29[label = < <B>raw_fastqc</B><br />sample: sample_1 >, color = black, style="rounded"];
+	30[label = < <B>fastq_screen</B><br />sample: sample_1 >, color = black, style="rounded,dashed"];
+	31[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	32[label = < <B>trim_reads</B><br />sample: sample_1 >, color = black, style="rounded,dashed"];
 	1 -> 0
-	7 -> 0
-	10 -> 0
-	11 -> 0
-	8 -> 0
+	2 -> 0
 	4 -> 0
+	6 -> 0
+	7 -> 0
+	8 -> 0
+	11 -> 0
 	12 -> 0
-	13 -> 0
-	2 -> 1
+	22 -> 0
+	25 -> 0
+	27 -> 0
+	28 -> 0
+	29 -> 0
+	30 -> 0
+	31 -> 0
 	3 -> 2
-	4 -> 3
-	5 -> 3
-	6 -> 5
-	8 -> 7
-	5 -> 7
-	9 -> 7
-	6 -> 8
-	2 -> 9
-	3 -> 9
-	1 -> 10
-	10 -> 11
-	2 -> 12
-	3 -> 12
-	3 -> 13
-	12 -> 13
+	1 -> 3
+	1 -> 4
+	5 -> 4
+	1 -> 5
+	31 -> 5
+	5 -> 6
+	31 -> 6
+	1 -> 7
+	6 -> 7
+	31 -> 7
+	9 -> 8
+	10 -> 8
+	29 -> 8
+	30 -> 8
+	31 -> 8
+	32 -> 8
+	1 -> 9
+	5 -> 9
+	31 -> 9
+	31 -> 10
+	9 -> 11
+	13 -> 12
+	14 -> 13
+	16 -> 13
+	17 -> 13
+	18 -> 13
+	19 -> 13
+	20 -> 13
+	21 -> 13
+	15 -> 14
+	31 -> 15
+	15 -> 16
+	15 -> 17
+	15 -> 18
+	15 -> 19
+	15 -> 20
+	15 -> 21
+	23 -> 22
+	24 -> 23
+	31 -> 24
+	26 -> 25
+	24 -> 26
+	4 -> 27
+	27 -> 28
+	1 -> 31
+	32 -> 31
 }            

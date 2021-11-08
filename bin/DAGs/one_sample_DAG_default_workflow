@@ -2,22 +2,25 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-	0[label = "all", color = "0 0 0", style="rounded"];
-	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "trim_galore", color = "0 0 0", style="rounded"];
-	5[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
-	6[label = "multiQC", color = "0 0 0", style="rounded"];
-	7[label = "biscuit_qc", color = "#FF0000", style="rounded"];
+	0[label = < <B>all</B> >, color = black, style="rounded"];
+	1[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	2[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	3[label = < <B>multiQC</B> >, color = black, style="rounded"];
+	4[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	5[label = < <B>percent_covered</B> >, color = black, style="rounded"];
+	6[label = < <B>raw_fastqc</B><br />sample: sample_1 >, color = black, style="rounded"];
+	7[label = < <B>biscuit_blaster</B><br />sample: sample_1 >, color = red, style="rounded"];
 	1 -> 0
+	3 -> 0
+	5 -> 0
 	6 -> 0
+	7 -> 0
 	2 -> 1
-	3 -> 2
+	7 -> 2
 	4 -> 3
-	5 -> 4
-	4 -> 6
-	7 -> 6
-	2 -> 7
-	3 -> 7
+	6 -> 3
+	7 -> 3
+	2 -> 4
+	7 -> 4
+	4 -> 5
 }            
