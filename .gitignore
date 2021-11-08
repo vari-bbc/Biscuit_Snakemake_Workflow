@@ -4,6 +4,9 @@ analysis/
 # Ignore assets/ directory files
 assets/
 
+# Ignore merged_reference/ directory files
+merged_reference/
+
 # Ignore .snakemake/ directory
 .snakemake
 
