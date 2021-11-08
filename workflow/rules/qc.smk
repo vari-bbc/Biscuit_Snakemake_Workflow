@@ -170,3 +170,60 @@ rule percent_covered:
         '../envs/python_packages.yaml'
     script:
         '../scripts/plot_percent_covered.py'
+
+if config['control_vectors']:
+    rule methylation_controls_qc:
+        input:
+            bed = f'{output_directory}/analysis/pileup/{{sample}}_mergecg.bed.gz',
+        output:
+            lambda_bed = f'{output_directory}/analysis/qc_vectors/lambda/{{sample}}.bed',
+            puc19_bed = f'{output_directory}/analysis/qc_vectors/puc19/{{sample}}.bed',
+        params:
+            lambda_dir = f'{output_directory}/analysis/qc_vectors/lambda',
+            puc19_dir = f'{output_directory}/analysis/qc_vectors/puc19',
+        log:
+            lambda_log = f'{output_directory}/logs/qc_vectors/lambda.{{sample}}_QC.log',
+            puc19_log = f'{output_directory}/logs/qc_vectors/puc19.{{sample}}_QC.log',
+        benchmark:
+            f'{output_directory}/benchmarks/qc_vectors/{{sample}}.txt',
+        threads: 1
+        resources:
+            mem_gb=32,
+            walltime = config['walltime']['medium'],
+        conda:
+            '../envs/biscuit.yaml'
+        envmodules:
+            config['envmodules']['samtools'],
+            config['envmodules']['htslib'],
+        shell:
+            """
+            mkdir -p {params.lambda_dir}
+            mkdir -p {params.puc19_dir}
+           
+            # >J02459.1 Escherichia phage Lambda, complete genome - UNMETHYLATED CONTROL
+            zcat {input.bed} | {{ grep '^J02459.1' || true; }} > {output.lambda_bed} 2> {log.lambda_log}
+
+            # >M77789.2 Cloning vector pUC19, complete sequence - METHYLATED CONTROL
+            zcat {input.bed} | {{ grep '^M77789.2' || true; }}  > {output.puc19_bed} 2> {log.puc19_log}
+            """
+
+    rule methylation_controls_figure:
+        input:
+            lambda_files = expand(f'{output_directory}/analysis/qc_vectors/lambda/{{samples.sample}}.bed', samples=SAMPLES.itertuples()),
+            puc19_files = expand(f'{output_directory}/analysis/qc_vectors/puc19/{{samples.sample}}.bed', samples=SAMPLES.itertuples()),
+        output:
+            pdf = f'{output_directory}/analysis/qc_vectors/control_vector_boxplot.pdf',
+        log:
+            f'{output_directory}/logs/qc_vectors/control_vector_boxplot.log',
+        benchmark:
+            f'{output_directory}/benchmarks/qc_vectors/control_vector_boxplot.log',
+        threads: 1
+        resources:
+            mem_gb=32,
+            walltime = config['walltime']['short'],
+        conda:
+            '../envs/r.yaml',
+        envmodules:
+            config['envmodules']['R'],
+        script:
+            '../scripts/control_vector.R'

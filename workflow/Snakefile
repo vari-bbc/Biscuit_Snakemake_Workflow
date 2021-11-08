@@ -24,6 +24,12 @@ output_directory = set_output_directory()
 rule all:
     input:
         ## Preprocessing files
+        # Include lambda phage and pUC19 references in supplied reference
+        expand(
+            'merged_reference/merged.fa.gz.{ext}',
+            ext=BISCUIT_INDEX_FORMATS
+        ) if config['build_ref_with_methylation_controls'] else [],
+
         # Rename FASTQs and run FastQC run over them
         expand(
             f'{output_directory}/analysis/raw_fastqc/{{samples.sample}}-1-R{{read}}_fastqc.{{ext}}',
@@ -81,6 +87,16 @@ rule all:
             type=['all_cpgs', 'cpg_islands', 'exon_cpgs', 'gene_cpgs', 'repeat_cpgs']
         ) if config['cpg_stats']['run'] else [],
         f'{output_directory}/analysis/cpg_stats/cgi_stats.pdf' if config['cpg_stats']['run'] else [],
+
+        expand(
+            f'{output_directory}/analysis/qc_vectors/lambda/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples()
+        ) if config['control_vectors'] else [],
+        expand(
+            f'{output_directory}/analysis/qc_vectors/puc19/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples()
+        ) if config['control_vectors'] else [],
+        f'{output_directory}/analysis/qc_vectors/control_vector_boxplot.pdf' if config['control_vectors'] else [],
 
 # Rules for preprocessing files
 include:

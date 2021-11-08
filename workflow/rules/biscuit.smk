@@ -3,12 +3,50 @@
 #
 # output_directory - workflow/Snakefile
 # config           - workflow/Snakefile
+# BISCUIT_INDEX_FORMATS - workflow/Snakefile
 #
 ###-----------------------------------------------------------------------------------------------------------------###
 
+if config['build_ref_with_methylation_controls']:
+    rule build_ref_with_methylation_controls:
+        input:
+            config['ref']['fasta'],
+        output:
+            ref = 'merged_reference/merged.fa.gz',
+            refdir = directory('merged_reference/'),
+            idxfil = expand('merged_reference/merged.fa.gz.{ext}', ext=BISCUIT_INDEX_FORMATS),
+        log:
+            f'{output_directory}/logs/build_merged_reference_index.log',
+        benchmark:
+            f'{output_directory}/benchmarks/build_merged_reference_index.txt',
+        threads: 2
+        resources:
+            mem_gb=32,
+            walltime = config['walltime']['medium'],
+        conda:
+            '../envs/biscuit.yaml'
+        envmodules:
+            config['envmodules']['biscuit'],
+            config['envmodules']['samtools'],
+        shell:
+            """
+            mkdir -p {output.refdir}
+
+            if (file {input} | grep -q "extra field"); then
+                cat <(bgzip -d {input}) <(zcat bin/puc19.fa.gz) <(zcat bin/lambda.fa.gz) | bgzip > {output.ref}
+            elif (file {input} | grep -q "gzip compressed data, was"); then
+                cat <(zcat {input}) <(zcat bin/puc19.fa.gz) <(zcat bin/lambda.fa.gz) | bgzip > {output.ref}
+            else
+                cat {input} <(zcat bin/puc19.fa.gz) <(zcat bin/lambda.fa.gz) | bgzip > {output.ref}
+            fi
+
+            biscuit index {output.ref}
+            samtools faidx {output.ref}
+            """
+
 def get_biscuit_reference(wildcards):
     if config['build_ref_with_methylation_controls']: # Currently not set up to be generated
-        return 'snakemake_built_reference_with_methylation_controls/merged.fa.gz'
+        return 'merged_reference/merged.fa.gz'
     else:
         return config['ref']['fasta']
 
