@@ -42,12 +42,12 @@ def create_plot(samples, outfiles):
     ax1.set_yticks(y); ax1.set_yticklabels(n, fontsize=18)
     ax3.set_yticks(y); ax3.set_yticklabels(n, fontsize=18)
 
-    ax1.text(50, len(n), 'One Read Covering', va='center', ha='center', size=16)
-    ax2.text(50, len(n), 'Three Reads Covering', va='center', ha='center', size=16)
-    ax3.text(50, len(n), 'Five Reads Covering', va='center', ha='center', size=16)
-    ax4.text(50, len(n), 'Seven Reads Covering', va='center', ha='center', size=16)
+    ax1.text(50, len(n), '1 Read', va='center', ha='center', size=16)
+    ax2.text(50, len(n), '3 Reads', va='center', ha='center', size=16)
+    ax3.text(50, len(n), '5 Reads', va='center', ha='center', size=16)
+    ax4.text(50, len(n), '7 Reads', va='center', ha='center', size=16)
 
-    plt.suptitle('CpG Island Statistics', x=0.5, y=1.05, fontsize=24)
+    plt.suptitle('# Reads Covering CpG Island', x=0.5, y=1.05, fontsize=24)
     ax1.set_title('', fontsize=16)
     ax2.set_title('', fontsize=16)
     ax3.set_title('', fontsize=16)
