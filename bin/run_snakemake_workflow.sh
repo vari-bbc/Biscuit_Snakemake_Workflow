@@ -5,7 +5,7 @@
 #PBS -o logs/workflow.o
 #PBS -e logs/workflow.e
 
-# Function to pull down config settings from bin/config.yaml
+# Function to pull down config settings from config/config.yaml
 # Pulled from StackOverflow:
 #     https://stackoverflow.com/questions/5014632/how-can-i-parse-a-yaml-file-from-a-linux-shell-script
 function parse_yaml {
@@ -29,20 +29,21 @@ cd ${PBS_O_WORKDIR}
 
 # Extract output directory from config.yaml, set to "." for default
 #     behavior (i.e., writing to same directory as Snakefile)
-eval $(parse_yaml bin/config.yaml "CONF_")
+eval $(parse_yaml config/config.yaml "CONF_")
 if [[ ${CONF_output_directory} == "" ]]; then
     : ${CONF_output_directory:="."}
 fi
-
-module load bbc/snakemake/snakemake-6.1.0
+mkdir -p ${CONF_output_directory}/logs/runs
 
 # save DAG job file with time stamp
 TIME=$(date "+%Y-%m-%d_%H.%M.%S")
 snakemake --use-envmodules -n > ${CONF_output_directory}/logs/runs/workflow_${TIME}.txt
 snakemake --dag | dot -Tpng > ${CONF_output_directory}/logs/runs/workflow_${TIME}.png
 
+# Default to using conda, if using environment modules, then replace --use-conda with --use-envmodules
+# Note, this requires downloading mamba (conda install -n base -c conda-forge mamba)
 snakemake \
-    --use-envmodules \
+    --use-conda \
     --jobs 20 \
     --cluster "qsub \
     -V \
