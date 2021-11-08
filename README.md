@@ -7,40 +7,57 @@ bisulfite sequencing data (https://huishenlab.github.io/biscuit/).
 Download BISCUIT here: https://github.com/huishenlab/biscuit/releases/latest.
 
 # Components of the workflow
-  0. [default off] Modify and index genome reference to including methylation controls (currently not implemented)
-  1. [default off] Trim adapters and/or hard clip R2
-  2. [default off] Run Fastq Screen in bisulfite mode
-  3. Run FastQC on raw FASTQ files
-  4. Alignment, duplicate tagging, indexing, flagstat of input data (biscuitBlaster v1 and v2)
-  5. Methylation information extraction (BED Format)
-  6. Merge C and G beta values in CpG dinucleotide context
-  7. [default off] SNP and Epiread extraction
-  8. [default off] Run Preseq on aligned BAM
-  9. MultiQC with BICUIT QC modules specifically for methyaltion data
-  10. [default off] QC methylated and unmethylated controls (currently not implemented)
+The following components are generally in order, but may run in a different order, depending on exact dependencies
+needed.
+  + [default off] Generate asset files used during QC related rules
+  + [default off] Modify and index genome reference to including methylation controls
+  + [default off] Trim adapters and/or hard clip R2
+  + [default off] Run Fastq Screen in bisulfite mode
+  + Run FastQC on raw FASTQ files
+  + Alignment, duplicate tagging, indexing, flagstat of input data (biscuitBlaster v1 and v2)
+  + Methylation information extraction (BED Format)
+  + Merge C and G beta values in CpG dinucleotide context
+  + [default off] SNP and Epiread extraction
+  + [default off] Run Preseq on aligned BAM
+  + MultiQC with BICUIT QC modules specifically for methyaltion data
+  + [default off] Generate plots of the observed / expected coverage ratio for different genomic features
+  + [default off] Generate percentage of covered CpGs and CpG island coverage figures
+  + [default off] QC methylated and unmethylated controls
 
 Many options can be easily specified in the `config.yaml`! Otherwise, the commands in the Snakefile can also be modified
 to meet different needs.
 
 # Dependencies
-  + BISCUIT
-  + R with packages tidyverse, patchwork, and viridis (only required for plotting methylation controls)
-  + SAMTools 1.12+
-  + Snakemake 6.0+
-  + samblaster
-  + htslib
-  + bedtools
-  + pigz
-  + parallel
-  + bismark (only required if running fastq_screen)
-  + fastq_screen (only required if running fastq_screen)
-  + fastQC
-  + multiQC
-  + parallel
-  + preseq
+The following dependencies are downloaded when running with `--use-conda`, otherwise you must have these in your PATH.
+  + `snakemake` (version 6.0+)
+  + `biscuit` (version 1.0.1+)
+  + `htslib` (version 1.12+)
+  + `samtools` (version 1.12+)
+  + `samblaster`
+  + `parallel` (preferably version 20201122)
+  + `bedtools`
+  + `preseq` (version 3.1.2+)
+  + `fastqc`
+  + `trim_galore`
+  + `fastq_screen` (only required if running `fastq_screen`)
+  + `bismark` (only required if running `fastq_screen`)
+  + `pigz`
+  + `python` (version 3.7+)
+    + `pandas`
+    + `numpy`
+    + `matplotlib`
+  + `multiqc`
+  + `R` (version 4.1.1+)
+    + `tidyverse` (only required for plotting methylation controls)
+    + `ggplot2` (only required for plotting methylation controls)
+    + `patchwork` (only required for plotting methylation controls)
+    + `viridislite` (only required for plotting methylation controls)
 
 # Running the workflow
-+ Clone the repo `git clone https://github.com/vari-bbc/WGBS_Biscuit_Snakemake`.
++ Clone the repo (https://github.com/huishenlab/Biscuit_Snakemake_Workflow/tree/master).
+  + `git clone git@github.com:huishenlab/Biscuit_Snakemake_Workflow.git (SSH)`
+  + `git clone https://github.com/huishenlab/Biscuit_Snakemake_Workflow.git (HTTPS)`
+   
 
 + Place *gzipped* FASTQ files into `raw_data/`. Alternatively, you can specify the location of your *gzipped* FASTQ
 files in `config/config.yaml`.
@@ -60,19 +77,23 @@ example file.
   + Reference genome
   + Biscuit index
   + Biscuit QC assets (https://github.com/huishenlab/biscuit/releases/latest)
-  + Environmental modules (If modules are not available, snakemake gives a warning but will run successfully
-  *as long as the required executables are in the path*)
   + Toggle optional workflow components
   + Set other run parameters in `config/config.yaml`
   + Turn on optional rules in `config/config.yaml` (change from False to True)
+  + If you are using environmental modules on your system, you can set the locations in the corresponding location. By
+  default, the pipeline will use `conda`/`mamba` to download the required packages. Note, if using the modules and a
+  module is not available, snakemake gives a warning but will run successfully *as long as the required executables are
+  in the path*.
 
-+ Then submit the rest workflow to an HPC using something similar to bin/run_snakemake_workflow.sh (e.g.,
-`qsub -q [queue_name] bin/run_snakemake_workflow.sh`)
++ Then submit the rest workflow to an HPC using something similar to `bin/run_snakemake_workflow.sh` (e.g.,
+`qsub -q [queue_name] bin/run_snakemake_workflow.sh`). `bin/run_snakemake_workflow.sh` works for a PBS/Torque queue
+system, but will need to be modifed to work with a Slurm or other system.
 
 # After the workflow
 
-+ The output files in `analysis/pileup/` may be imported into a `BSseq` object using `bicuiteer::readBiscuit()`.
-+ `analysis/multiqc/multiqc_report.html` contains the methylation-specific BISCUIT QC modules
++ The output files in `config['output_directory']/analysis/pileup/` may be imported into a `BSseq` object using
+`bicuiteer::readBiscuit()`.
++ `config['output_directory']/analysis/multiqc/multiqc_report.html` contains the methylation-specific BISCUIT QC modules
 (https://huishenlab.github.io/biscuit/docs/alignment/QC.html)
 
 # Test dataset
@@ -86,14 +107,9 @@ These example files can be mapped to the human genome.
 
 
 # Helpful snakemake commands for debugging a workflow
-
-Do a test run: `snakemake -npr`
-
-Unlock directory after a manually aborted run: `snakemake --unlock --cores 1`
-
-Create a workflow diagram for your run: `snakemake --dag | dot -Tpng > my_dag.png`
-
-Run pipeline from the command line: `snakemake --use-envmodules --cores 1`
-
 For more information on Snakemake: https://snakemake.readthedocs.io/en/stable/
 
+  + Do a test run: `snakemake -npr`
+  + Unlock directory after a manually aborted run: `snakemake --unlock --cores 1`
+  + Create a workflow diagram for your run: `snakemake --dag | dot -Tpng > my_dag.png`
+  + Run pipeline from the command line: `snakemake --use-conda --cores 1`
