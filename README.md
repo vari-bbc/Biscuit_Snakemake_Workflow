@@ -28,6 +28,7 @@ Many options can be easily specified in the `config.yaml`! Otherwise, the comman
 to meet different needs.
 
 # Dependencies
+
 The following dependencies are downloaded when running with `--use-conda`, otherwise you must have these in your PATH.
   + `snakemake` (version 6.0+)
   + `biscuit` (version 1.0.1+)
