@@ -1,0 +1,12 @@
+name: biscuit
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - biscuit=1.0.1.20211018
+    - htslib=1.14
+    - samtools=1.14
+    - samblaster=0.1.26
+    - parallel=20201122
+    - bedtools=2.30.0

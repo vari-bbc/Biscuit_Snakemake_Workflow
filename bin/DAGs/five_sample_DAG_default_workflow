@@ -2,82 +2,89 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-	0[label = "all", color = "0 0 0", style="rounded"];
-	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "trim_galore", color = "0 0 0", style="rounded"];
-	5[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
-	6[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	7[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	8[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	9[label = "trim_galore", color = "0 0 0", style="rounded"];
-	10[label = "rename_fastq\nsample: sample_2", color = "0 0 0", style="rounded"];
-	11[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	12[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	13[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	14[label = "trim_galore", color = "0 0 0", style="rounded"];
-	15[label = "rename_fastq\nsample: sample_3", color = "0 0 0", style="rounded"];
-	16[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	17[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	18[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	19[label = "trim_galore", color = "0 0 0", style="rounded"];
-	20[label = "rename_fastq\nsample: sample_4", color = "0 0 0", style="rounded"];
-	21[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	22[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	23[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	24[label = "trim_galore", color = "0 0 0", style="rounded"];
-	25[label = "rename_fastq\nsample: sample_5", color = "0 0 0", style="rounded"];
-	26[label = "multiQC", color = "0 0 0", style="rounded"];
-	27[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	28[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	29[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	30[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	31[label = "biscuit_qc", color = "#FF0000", style="rounded"];
+	0[label = < <B>all</B> >, color = black, style="rounded"];
+	1[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	2[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	3[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	4[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	5[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	6[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	7[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	8[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	9[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	10[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	11[label = < <B>multiQC</B> >, color = black, style="rounded"];
+	12[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	13[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	14[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	15[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	16[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	17[label = < <B>percent_covered</B> >, color = black, style="rounded"];
+	18[label = < <B>raw_fastqc</B><br />sample: sample_1 >, color = black, style="rounded"];
+	19[label = < <B>raw_fastqc</B><br />sample: sample_2 >, color = black, style="rounded"];
+	20[label = < <B>raw_fastqc</B><br />sample: sample_3 >, color = black, style="rounded"];
+	21[label = < <B>raw_fastqc</B><br />sample: sample_4 >, color = black, style="rounded"];
+	22[label = < <B>raw_fastqc</B><br />sample: sample_5 >, color = black, style="rounded"];
+	23[label = < <B>biscuit_blaster</B><br />sample: sample_1 >, color = red, style="rounded"];
+	24[label = < <B>biscuit_blaster</B><br />sample: sample_2 >, color = red, style="rounded"];
+	25[label = < <B>biscuit_blaster</B><br />sample: sample_3 >, color = red, style="rounded"];
+	26[label = < <B>biscuit_blaster</B><br />sample: sample_4 >, color = red, style="rounded"];
+	27[label = < <B>biscuit_blaster</B><br />sample: sample_5 >, color = red, style="rounded"];
 	1 -> 0
-	6 -> 0
+	3 -> 0
+	5 -> 0
+	7 -> 0
+	9 -> 0
 	11 -> 0
-	16 -> 0
+	17 -> 0
+	18 -> 0
+	19 -> 0
+	20 -> 0
 	21 -> 0
+	22 -> 0
+	23 -> 0
+	24 -> 0
+	25 -> 0
 	26 -> 0
+	27 -> 0
 	2 -> 1
-	3 -> 2
+	23 -> 2
 	4 -> 3
-	5 -> 4
-	7 -> 6
+	24 -> 4
+	6 -> 5
+	25 -> 6
 	8 -> 7
-	9 -> 8
+	26 -> 8
 	10 -> 9
+	27 -> 10
 	12 -> 11
-	13 -> 12
-	14 -> 13
-	15 -> 14
-	17 -> 16
-	18 -> 17
-	19 -> 18
-	20 -> 19
-	22 -> 21
-	23 -> 22
-	24 -> 23
-	25 -> 24
-	4 -> 26
-	9 -> 26
-	14 -> 26
-	19 -> 26
-	24 -> 26
-	27 -> 26
-	28 -> 26
-	29 -> 26
-	30 -> 26
-	31 -> 26
-	2 -> 27
-	3 -> 27
-	7 -> 28
-	8 -> 28
-	12 -> 29
-	13 -> 29
-	17 -> 30
-	18 -> 30
-	22 -> 31
-	23 -> 31
+	13 -> 11
+	14 -> 11
+	15 -> 11
+	16 -> 11
+	18 -> 11
+	19 -> 11
+	20 -> 11
+	21 -> 11
+	22 -> 11
+	23 -> 11
+	24 -> 11
+	25 -> 11
+	26 -> 11
+	27 -> 11
+	2 -> 12
+	23 -> 12
+	4 -> 13
+	24 -> 13
+	6 -> 14
+	25 -> 14
+	8 -> 15
+	26 -> 15
+	10 -> 16
+	27 -> 16
+	12 -> 17
+	13 -> 17
+	14 -> 17
+	15 -> 17
+	16 -> 17
 }            

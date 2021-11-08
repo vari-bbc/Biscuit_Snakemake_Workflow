@@ -2,164 +2,399 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-	0[label = "all", color = "0 0 0", style="rounded"];
-	1[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	2[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	3[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	4[label = "trim_galore", color = "0 0 0", style="rounded"];
-	5[label = "rename_fastq\nsample: sample_1", color = "0 0 0", style="rounded"];
-	6[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	7[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	8[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	9[label = "trim_galore", color = "0 0 0", style="rounded"];
-	10[label = "rename_fastq\nsample: sample_2", color = "0 0 0", style="rounded"];
-	11[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	12[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	13[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	14[label = "trim_galore", color = "0 0 0", style="rounded"];
-	15[label = "rename_fastq\nsample: sample_3", color = "0 0 0", style="rounded"];
-	16[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	17[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	18[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	19[label = "trim_galore", color = "0 0 0", style="rounded"];
-	20[label = "rename_fastq\nsample: sample_4", color = "0 0 0", style="rounded"];
-	21[label = "biscuit_mergecg", color = "#FF0000", style="rounded"];
-	22[label = "biscuit_pileup", color = "#FF0000", style="rounded"];
-	23[label = "biscuit_align", color = "#FF0000", style="rounded"];
-	24[label = "trim_galore", color = "0 0 0", style="rounded"];
-	25[label = "rename_fastq\nsample: sample_5", color = "0 0 0", style="rounded"];
-	26[label = "multiQC", color = "0 0 0", style="rounded"];
-	27[label = "fastq_screen", color = "0 0 0", style="rounded"];
-	28[label = "fastq_screen", color = "0 0 0", style="rounded"];
-	29[label = "fastq_screen", color = "0 0 0", style="rounded"];
-	30[label = "fastq_screen", color = "0 0 0", style="rounded"];
-	31[label = "fastq_screen", color = "0 0 0", style="rounded"];
-	32[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	33[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	34[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	35[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	36[label = "biscuit_qc", color = "#FF0000", style="rounded"];
-	37[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	38[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	39[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	40[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	41[label = "methylation_controls_qc", color = "0 0 0", style="rounded"];
-	42[label = "methylation_controls_figure", color = "0 0 0", style="rounded"];
-	43[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	44[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	45[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	46[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	47[label = "biscuit_snps", color = "#FF0000", style="rounded"];
-	48[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
-	49[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
-	50[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
-	51[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
-	52[label = "biscuit_epiread", color = "#FF0000", style="rounded"];
+	0[label = < <B>all</B> >, color = black, style="rounded"];
+	1[label = < <B>build_ref_with_methylation_controls</B> >, color = black, style="rounded,dashed"];
+	2[label = < <B>bismap_assets</B> >, color = black, style="rounded,dashed"];
+	3[label = < <B>general_assets</B> >, color = black, style="rounded,dashed"];
+	4[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	5[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	6[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	7[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	8[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	9[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	10[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	11[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	12[label = < <B>biscuit_mergecg</B> >, color = red, style="rounded"];
+	13[label = < <B>biscuit_pileup</B> >, color = red, style="rounded"];
+	14[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	15[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	16[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	17[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	18[label = < <B>biscuit_snps</B> >, color = red, style="rounded,dashed"];
+	19[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	20[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	21[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	22[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	23[label = < <B>biscuit_epiread</B> >, color = red, style="rounded,dashed"];
+	24[label = < <B>multiQC</B> >, color = black, style="rounded"];
+	25[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	26[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	27[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	28[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	29[label = < <B>biscuit_qc</B> >, color = red, style="rounded"];
+	30[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	31[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	32[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	33[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	34[label = < <B>preseq</B> >, color = black, style="rounded,dashed"];
+	35[label = < <B>percent_covered</B> >, color = black, style="rounded"];
+	36[label = < <B>obs_exp_coverage_plot</B> >, color = black, style="rounded,dashed"];
+	37[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	38[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	39[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	40[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	41[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	42[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	43[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	44[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	45[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	46[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	47[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	48[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	49[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	50[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	51[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	52[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	53[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	54[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	55[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	56[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	57[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	58[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	59[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	60[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	61[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	62[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	63[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	64[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	65[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	66[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	67[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	68[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	69[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	70[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	71[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	72[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	73[label = < <B>obs_exp_coverage_values</B> >, color = black, style="rounded,dashed"];
+	74[label = < <B>obs_exp_coverage_genomecov_cpg</B> >, color = black, style="rounded,dashed"];
+	75[label = < <B>obs_exp_coverage_genomecov</B> >, color = black, style="rounded,dashed"];
+	76[label = < <B>obs_exp_coverage_genomecov_cgi</B> >, color = black, style="rounded,dashed"];
+	77[label = < <B>obs_exp_coverage_genomecov_exon</B> >, color = black, style="rounded,dashed"];
+	78[label = < <B>obs_exp_coverage_genomecov_genic</B> >, color = black, style="rounded,dashed"];
+	79[label = < <B>obs_exp_coverage_genomecov_intergenic</B> >, color = black, style="rounded,dashed"];
+	80[label = < <B>obs_exp_coverage_genomecov_rmsk</B> >, color = black, style="rounded,dashed"];
+	81[label = < <B>obs_exp_coverage_genomecov_mapped</B> >, color = black, style="rounded,dashed"];
+	82[label = < <B>cpg_stats_feature_plot</B> >, color = black, style="rounded,dashed"];
+	83[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	84[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	85[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	86[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	87[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	88[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	89[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	90[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	91[label = < <B>cpg_stats_feature_table</B> >, color = black, style="rounded,dashed"];
+	92[label = < <B>cpg_stats_genomecov</B> >, color = black, style="rounded,dashed"];
+	93[label = < <B>cpg_stats_cgi_plot</B> >, color = black, style="rounded,dashed"];
+	94[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	95[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	96[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	97[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	98[label = < <B>cpg_stats_cgi_table</B> >, color = black, style="rounded,dashed"];
+	99[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	100[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	101[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	102[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	103[label = < <B>methylation_controls_qc</B> >, color = black, style="rounded,dashed"];
+	104[label = < <B>methylation_controls_figure</B> >, color = black, style="rounded,dashed"];
+	105[label = < <B>raw_fastqc</B><br />sample: sample_1 >, color = black, style="rounded"];
+	106[label = < <B>raw_fastqc</B><br />sample: sample_2 >, color = black, style="rounded"];
+	107[label = < <B>raw_fastqc</B><br />sample: sample_3 >, color = black, style="rounded"];
+	108[label = < <B>raw_fastqc</B><br />sample: sample_4 >, color = black, style="rounded"];
+	109[label = < <B>raw_fastqc</B><br />sample: sample_5 >, color = black, style="rounded"];
+	110[label = < <B>fastq_screen</B><br />sample: sample_1 >, color = black, style="rounded,dashed"];
+	111[label = < <B>fastq_screen</B><br />sample: sample_2 >, color = black, style="rounded,dashed"];
+	112[label = < <B>fastq_screen</B><br />sample: sample_3 >, color = black, style="rounded,dashed"];
+	113[label = < <B>fastq_screen</B><br />sample: sample_4 >, color = black, style="rounded,dashed"];
+	114[label = < <B>fastq_screen</B><br />sample: sample_5 >, color = black, style="rounded,dashed"];
+	115[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	116[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	117[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	118[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	119[label = < <B>biscuit_blaster</B> >, color = red, style="rounded"];
+	120[label = < <B>trim_reads</B><br />sample: sample_1 >, color = black, style="rounded,dashed"];
+	121[label = < <B>trim_reads</B><br />sample: sample_2 >, color = black, style="rounded,dashed"];
+	122[label = < <B>trim_reads</B><br />sample: sample_3 >, color = black, style="rounded,dashed"];
+	123[label = < <B>trim_reads</B><br />sample: sample_4 >, color = black, style="rounded,dashed"];
+	124[label = < <B>trim_reads</B><br />sample: sample_5 >, color = black, style="rounded,dashed"];
 	1 -> 0
+	2 -> 0
+	4 -> 0
 	6 -> 0
-	11 -> 0
+	8 -> 0
+	10 -> 0
+	12 -> 0
+	14 -> 0
+	15 -> 0
 	16 -> 0
+	17 -> 0
+	18 -> 0
+	19 -> 0
+	20 -> 0
 	21 -> 0
-	26 -> 0
-	37 -> 0
-	38 -> 0
-	39 -> 0
-	40 -> 0
-	41 -> 0
-	42 -> 0
-	27 -> 0
-	28 -> 0
-	29 -> 0
-	30 -> 0
-	31 -> 0
-	43 -> 0
-	44 -> 0
-	45 -> 0
-	46 -> 0
-	47 -> 0
-	48 -> 0
-	49 -> 0
-	50 -> 0
-	51 -> 0
-	52 -> 0
-	2 -> 1
+	22 -> 0
+	23 -> 0
+	24 -> 0
+	35 -> 0
+	36 -> 0
+	82 -> 0
+	93 -> 0
+	99 -> 0
+	100 -> 0
+	101 -> 0
+	102 -> 0
+	103 -> 0
+	104 -> 0
+	105 -> 0
+	106 -> 0
+	107 -> 0
+	108 -> 0
+	109 -> 0
+	110 -> 0
+	111 -> 0
+	112 -> 0
+	113 -> 0
+	114 -> 0
+	115 -> 0
+	116 -> 0
+	117 -> 0
+	118 -> 0
+	119 -> 0
 	3 -> 2
-	4 -> 3
+	1 -> 3
+	1 -> 4
 	5 -> 4
+	1 -> 5
+	115 -> 5
+	1 -> 6
 	7 -> 6
-	8 -> 7
+	1 -> 7
+	116 -> 7
+	1 -> 8
 	9 -> 8
-	10 -> 9
-	12 -> 11
+	1 -> 9
+	117 -> 9
+	1 -> 10
+	11 -> 10
+	1 -> 11
+	118 -> 11
+	1 -> 12
 	13 -> 12
-	14 -> 13
-	15 -> 14
-	17 -> 16
-	18 -> 17
-	19 -> 18
-	20 -> 19
-	22 -> 21
-	23 -> 22
-	24 -> 23
+	1 -> 13
+	119 -> 13
+	5 -> 14
+	115 -> 14
+	7 -> 15
+	116 -> 15
+	9 -> 16
+	117 -> 16
+	11 -> 17
+	118 -> 17
+	13 -> 18
+	119 -> 18
+	1 -> 19
+	14 -> 19
+	115 -> 19
+	1 -> 20
+	15 -> 20
+	116 -> 20
+	1 -> 21
+	16 -> 21
+	117 -> 21
+	1 -> 22
+	17 -> 22
+	118 -> 22
+	1 -> 23
+	18 -> 23
+	119 -> 23
 	25 -> 24
-	27 -> 26
-	28 -> 26
-	29 -> 26
-	30 -> 26
-	31 -> 26
-	4 -> 26
-	9 -> 26
-	14 -> 26
-	19 -> 26
-	24 -> 26
-	32 -> 26
-	33 -> 26
-	34 -> 26
-	35 -> 26
-	36 -> 26
-	5 -> 27
-	10 -> 28
-	15 -> 29
-	20 -> 30
-	25 -> 31
-	2 -> 32
-	3 -> 32
-	7 -> 33
-	8 -> 33
-	12 -> 34
-	13 -> 34
-	17 -> 35
-	18 -> 35
-	22 -> 36
-	23 -> 36
-	1 -> 37
-	6 -> 38
-	11 -> 39
-	16 -> 40
-	21 -> 41
-	37 -> 42
-	38 -> 42
+	26 -> 24
+	27 -> 24
+	28 -> 24
+	29 -> 24
+	30 -> 24
+	31 -> 24
+	32 -> 24
+	33 -> 24
+	34 -> 24
+	105 -> 24
+	106 -> 24
+	107 -> 24
+	108 -> 24
+	109 -> 24
+	110 -> 24
+	111 -> 24
+	112 -> 24
+	113 -> 24
+	114 -> 24
+	115 -> 24
+	116 -> 24
+	117 -> 24
+	118 -> 24
+	119 -> 24
+	120 -> 24
+	121 -> 24
+	122 -> 24
+	123 -> 24
+	124 -> 24
+	1 -> 25
+	5 -> 25
+	115 -> 25
+	1 -> 26
+	7 -> 26
+	116 -> 26
+	1 -> 27
+	9 -> 27
+	117 -> 27
+	1 -> 28
+	11 -> 28
+	118 -> 28
+	1 -> 29
+	13 -> 29
+	119 -> 29
+	115 -> 30
+	116 -> 31
+	117 -> 32
+	118 -> 33
+	119 -> 34
+	25 -> 35
+	26 -> 35
+	27 -> 35
+	28 -> 35
+	29 -> 35
+	37 -> 36
+	46 -> 36
+	55 -> 36
+	64 -> 36
+	73 -> 36
+	38 -> 37
+	40 -> 37
+	41 -> 37
+	42 -> 37
+	43 -> 37
+	44 -> 37
+	45 -> 37
+	39 -> 38
+	115 -> 39
+	39 -> 40
+	39 -> 41
 	39 -> 42
-	40 -> 42
-	41 -> 42
-	2 -> 43
-	3 -> 43
-	7 -> 44
-	8 -> 44
-	12 -> 45
-	13 -> 45
-	17 -> 46
-	18 -> 46
-	22 -> 47
-	23 -> 47
-	3 -> 48
-	43 -> 48
-	8 -> 49
-	44 -> 49
-	13 -> 50
-	45 -> 50
-	18 -> 51
-	46 -> 51
-	23 -> 52
-	47 -> 52
+	39 -> 43
+	39 -> 44
+	39 -> 45
+	47 -> 46
+	49 -> 46
+	50 -> 46
+	51 -> 46
+	52 -> 46
+	53 -> 46
+	54 -> 46
+	48 -> 47
+	116 -> 48
+	48 -> 49
+	48 -> 50
+	48 -> 51
+	48 -> 52
+	48 -> 53
+	48 -> 54
+	56 -> 55
+	58 -> 55
+	59 -> 55
+	60 -> 55
+	61 -> 55
+	62 -> 55
+	63 -> 55
+	57 -> 56
+	117 -> 57
+	57 -> 58
+	57 -> 59
+	57 -> 60
+	57 -> 61
+	57 -> 62
+	57 -> 63
+	65 -> 64
+	67 -> 64
+	68 -> 64
+	69 -> 64
+	70 -> 64
+	71 -> 64
+	72 -> 64
+	66 -> 65
+	118 -> 66
+	66 -> 67
+	66 -> 68
+	66 -> 69
+	66 -> 70
+	66 -> 71
+	66 -> 72
+	74 -> 73
+	76 -> 73
+	77 -> 73
+	78 -> 73
+	79 -> 73
+	80 -> 73
+	81 -> 73
+	75 -> 74
+	119 -> 75
+	75 -> 76
+	75 -> 77
+	75 -> 78
+	75 -> 79
+	75 -> 80
+	75 -> 81
+	83 -> 82
+	85 -> 82
+	87 -> 82
+	89 -> 82
+	91 -> 82
+	84 -> 83
+	115 -> 84
+	86 -> 85
+	116 -> 86
+	88 -> 87
+	117 -> 88
+	90 -> 89
+	118 -> 90
+	92 -> 91
+	119 -> 92
+	94 -> 93
+	95 -> 93
+	96 -> 93
+	97 -> 93
+	98 -> 93
+	84 -> 94
+	86 -> 95
+	88 -> 96
+	90 -> 97
+	92 -> 98
+	4 -> 99
+	6 -> 100
+	8 -> 101
+	10 -> 102
+	12 -> 103
+	99 -> 104
+	100 -> 104
+	101 -> 104
+	102 -> 104
+	103 -> 104
+	1 -> 115
+	120 -> 115
+	1 -> 116
+	121 -> 116
+	1 -> 117
+	122 -> 117
+	1 -> 118
+	123 -> 118
+	1 -> 119
+	124 -> 119
 }            

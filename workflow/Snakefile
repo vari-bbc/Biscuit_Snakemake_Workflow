@@ -1,0 +1,121 @@
+import pandas as pd
+import os
+import re
+
+from snakemake.utils import min_version
+
+# Set minimum Snakemake version
+min_version('6.0')
+
+# Set some predetermined values
+configfile:
+    'config/config.yaml'
+
+SAMPLES = pd.read_table(config['samples'], dtype=str).set_index(['sample'], drop=False)
+BISCUIT_INDEX_FORMATS = ['bis.ann', 'bis.amb', 'par.bwt', 'dau.bwt', 'bis.pac', 'par.sa', 'dau.sa', 'fai']
+
+def set_output_directory():
+    if config['output_directory'] == '':
+        return os.getcwd()
+    else:
+        return config['output_directory']
+output_directory = set_output_directory()
+
+rule all:
+    input:
+        ## Preprocessing files
+        # Include lambda phage and pUC19 references in supplied reference
+        expand(
+            'merged_reference/merged.fa.gz.{ext}',
+            ext=BISCUIT_INDEX_FORMATS
+        ) if config['build_ref_with_methylation_controls'] else [],
+
+        # Rename FASTQs and run FastQC run over them
+        expand(
+            f'{output_directory}/analysis/raw_fastqc/{{samples.sample}}-1-R{{read}}_fastqc.{{ext}}',
+            ext=['html','zip'], read=[1,2], samples=SAMPLES.itertuples()
+        ),
+
+        # fastq_screen
+        expand(
+            f'{output_directory}/analysis/fastq_screen/{{samples.sample}}-1-R{{read}}_screen.html',
+            read=[1,2], samples=SAMPLES.itertuples()
+        ) if config['run_fastq_screen'] else [],
+
+        expand(
+            f'assets/{config["create_assets"]["genome"]}/{{type}}_bismap.bed.gz',
+            type=['cpg', 'cgi', 'exon', 'genic', 'intergenic', 'rmsk']
+        ) if config['create_assets']['run'] else [],
+
+        ## Run BISCUIT
+        # biscuit align
+        expand(
+            f'{output_directory}/analysis/align/{{samples.sample}}.sorted.markdup.bam',
+            samples=SAMPLES.itertuples()
+        ),
+        # biscuit mergecg
+        expand(
+            f'{output_directory}/analysis/pileup/{{samples.sample}}_mergecg.bed.gz',
+            samples=SAMPLES.itertuples()
+        ),
+        # biscuit vcf2bed -t snp
+        expand(
+            f'{output_directory}/analysis/snps/{{samples.sample}}.snp.bed.gz',
+            samples=SAMPLES.itertuples()
+        ) if config['generate_snps'] or config['epiread'] else [],
+        # biscuit epiread
+        expand(
+            f'{output_directory}/analysis/epiread/{{samples.sample}}.epibed.gz',
+            samples=SAMPLES.itertuples()
+        ) if config['epiread'] else [],
+
+        ## Do post-processing QC
+        # MultiQC
+        f'{output_directory}/analysis/multiqc/multiqc_report.html',
+        f'{output_directory}/analysis/percent_genome_covered.pdf',
+
+        ## Run any other QC steps
+        # Observed / Expected coverage
+        expand(
+            f'{output_directory}/analysis/obs_exp/obs_exp_{{type}}.pdf',
+            type=['cpgs', 'cgis', 'exon', 'gene', 'intr', 'rmsk']
+        ) if config['obs_exp']['run'] else [],
+
+        # CpG coverage stats
+        expand(
+            f'{output_directory}/analysis/cpg_stats/feature_{{type}}.pdf',
+            type=['all_cpgs', 'cpg_islands', 'exon_cpgs', 'gene_cpgs', 'repeat_cpgs']
+        ) if config['cpg_stats']['run'] else [],
+        f'{output_directory}/analysis/cpg_stats/cgi_stats.pdf' if config['cpg_stats']['run'] else [],
+
+        expand(
+            f'{output_directory}/analysis/qc_vectors/lambda/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples()
+        ) if config['control_vectors'] else [],
+        expand(
+            f'{output_directory}/analysis/qc_vectors/puc19/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples()
+        ) if config['control_vectors'] else [],
+        f'{output_directory}/analysis/qc_vectors/control_vector_boxplot.pdf' if config['control_vectors'] else [],
+
+# Rules for preprocessing files
+include:
+    'rules/preprocessing.smk'
+
+# Rules for running BISCUIT related commands
+include:
+    'rules/biscuit.smk'
+
+# Rules for various QC metrics
+include:
+    'rules/qc.smk'
+
+# Rules for other QC things
+include:
+    'rules/obs_exp.smk'
+include:
+    'rules/cpg_stats.smk'
+
+# Rules for creating assets
+include:
+    'rules/create_assets.smk'
