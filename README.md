@@ -54,6 +54,11 @@ The following dependencies are downloaded when running with `--use-conda`, other
     + `patchwork` (only required for plotting methylation controls)
     + `viridislite` (only required for plotting methylation controls)
 
+Two things of note, 1) it is easiest when working with `snakemake` to install `mamba` using `conda` when running with
+`--use-conda`, and 2) it is preferable to install `snakemake` using `conda`, rather than using a module. This is due to
+potential conflicts between packages (such as `matplotlib`) that can be found in the snakemake module's python
+distrubtion and the conda installed python distribution.
+
 # Running the workflow
 + Clone the repo (https://github.com/huishenlab/Biscuit_Snakemake_Workflow/tree/master).
   + `git clone git@github.com:huishenlab/Biscuit_Snakemake_Workflow.git (SSH)`
