@@ -37,7 +37,7 @@ The following dependencies are downloaded when running with `--use-conda`, other
   + `samblaster`
   + `parallel` (preferably version 20201122)
   + `bedtools`
-  + `preseq` (version 3.1.2+)
+  + `preseq` (version 3.1.2+, must be compiled with htslib enabled)
   + `fastqc`
   + `trim_galore`
   + `fastq_screen` (only required if running `fastq_screen`)

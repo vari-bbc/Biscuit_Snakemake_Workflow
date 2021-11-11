@@ -73,6 +73,7 @@ rule preseq:
     params:
         dir = f'{output_directory}/analysis/preseq',
         out = f'{output_directory}/analysis/preseq/{{sample}}.ccurve.txt',
+        opt = config['preseq_options'],
     log:
         f'{output_directory}/logs/preseq/{{sample}}.log',
     benchmark:
@@ -88,7 +89,7 @@ rule preseq:
     shell:
         """
         mkdir -p {params.dir}
-        preseq c_curve -o {params.out} -P {input.bam} 2> {log}
+        preseq c_curve {params.opt} -o {params.out} -P -B {input.bam} 2> {log}
         """
 
 def get_multiQC_params(wildcards):

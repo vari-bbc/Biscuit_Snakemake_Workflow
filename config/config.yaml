@@ -85,7 +85,9 @@ fastq_screen_conf: /primary/projects/bbc/references/fastq_screen/downloaded_2020
 # Run preseq on data
 # If True - run preseq
 # If False - skip this step
+# preseq_options - other options to include in preseq c_curve (output file, paired end, and BAM input options already included)
 preseq: False
+preseq_options: ''
 
 # Calculate the ratio observed/expected coverage based on bismap results for different genomic features
 # run - create obs/exp plots if True, skip if False
