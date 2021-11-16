@@ -21,6 +21,18 @@ def set_output_directory():
         return config['output_directory']
 output_directory = set_output_directory()
 
+# Create a tag to use in output files based on the bin size 
+# Taken from the multiscale_methylation snakemake workflow
+def create_tag(step):
+    if step < 1000: # Just bp
+        return f'{step}bp'
+    elif step < 1000000: # kilobases
+        return f'{int(step/1000)}kb'
+    else: # Anything bigger will be defined as megabases
+        return f'{int(step/1000000)}Mb'
+
+bin_tags = list(map(create_tag, config["binned_averages"]["bin_sizes"]))
+
 rule all:
     input:
         ## Preprocessing files
@@ -97,7 +109,13 @@ rule all:
             samples=SAMPLES.itertuples()
         ) if config['control_vectors'] else [],
         f'{output_directory}/analysis/qc_vectors/control_vector_boxplot.pdf' if config['control_vectors'] else [],
-
+        
+        # binned_averages
+        expand(
+            f'{output_directory}/analysis/binned_averages/{{samples.sample}}_{{BIN_TAGS}}.bed.gz',
+            samples=SAMPLES.itertuples(), BIN_TAGS = bin_tags,
+        ) if config['binned_averages']['run'] else [],
+        
 # Rules for preprocessing files
 include:
     'rules/preprocessing.smk'
@@ -119,3 +137,7 @@ include:
 # Rules for creating assets
 include:
     'rules/create_assets.smk'
+
+# Rules for creating binned averages
+include:
+    'rules/binned_average.smk'
