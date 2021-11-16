@@ -3,8 +3,8 @@
 #     index: does not need to be different from "fasta", but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
 #     assets: prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 ref:
-    fasta: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
-    index: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
+    fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
+    index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
     assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets
 
 # Directory where raw FASTQs live, can be absolute path or path relative to Snakefile
@@ -32,7 +32,7 @@ create_assets:
 #         Note, when processing data generated with the Adaptase module, it is highly suggested to set args_list: '--clip_R2 15'
 trim_galore:
     trim_before_BISCUIT: False
-    args_list: ''
+    args_list: '--clip_R2 14'
 
 # BISCUIT alignment options
 #     biscuit_blaster_version: version of biscuitBlaster to run (specify either v1 or v2)
@@ -56,10 +56,10 @@ sam_header:
     LB: b1
 
 # Call SNPs with BISCUIT (True) or not (False)?
-generate_snps: False
+generate_snps: True
 
 # Create epiBED files (True) or not (False)? Sets generate_snps to True if epiread is True
-epiread: False
+epiread: True
 
 # Create a joint reference with ref['fasta'], lambda phage, and pUC19 genomes (lambda phage and pUC19 genomes proved in bin/)
 # Lambda phage and pUC19 control vectors are only included in Illumina's NEBNext® Enzymatic Methyl-seq Kit
@@ -161,13 +161,11 @@ walltime:
     long: 200:00:00
 
 
-###########################################################################################
-#### WARNING ///// STUFF BELOW HERE IS UNDER DEVELOPMENT AND NOT RECOMMENDED TO TURN ON
-###########################################################################################
-
-# Create sliding window, binned average methylation levels
-#     run: calculate averages (True) otherwise skip (False)
-#     covFilter: filter out CpGs with coverage less than covFilter
-SlidingWindow:
-    run: False
-    covFilter: 10
+# Create binned average methylation values using bin/find_binned_averages.sh
+binned_averages:
+   run: True
+   covFilter: 1
+   bin_sizes: [10000, 100000, 1000000] # one bin_sizes will also work, but needs to be a python list!
+   #~ bin_sizes: [1000000] # one bin_sizes will also work, but needs to be a python list!
+   
+   
