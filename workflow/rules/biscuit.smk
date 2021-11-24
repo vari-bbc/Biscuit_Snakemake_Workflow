@@ -317,7 +317,7 @@ rule biscuit_epiread:
         f'{output_directory}/logs/epiread/epiread.{{sample}}.log',
     benchmark:
         f'{output_directory}/benchmarks/biscuit_epiread/{{sample}}.txt'
-    threads: 1
+    threads: config['hpcParameters']['pileupThreads']
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
@@ -330,9 +330,9 @@ rule biscuit_epiread:
         """
         if [[ "$(zcat {input.snps} | head -n 1 | wc -l)" == "1" ]]; then
             if [ {params.nome} == "True" ]; then
-                biscuit epiread -N -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
+                biscuit epiread -N -@ {threads} -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
             else
-                biscuit epiread -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
+                biscuit epiread -@ {threads} -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
             fi
         else
             if [ {params.nome} == "True" ]; then
