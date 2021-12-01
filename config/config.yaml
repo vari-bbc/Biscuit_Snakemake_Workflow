@@ -3,9 +3,9 @@
 #     index: does not need to be different from "fasta", but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
 #     assets: prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 ref:
-    fasta: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
-    index: /home/ian.beddows/canary/GRCh38_EMseq/EMseq_GRCh38.primary_assembly.genome.fa.gz
-    assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets
+    fasta: /path/to/your/fasta/file/genome.fa
+    index: /path/to/your/biscuit/index/base/that/could/be/the/same/as/fasta/genome.fa
+    assets: /path/to/your/biscuit_qc/assets
 
 # Directory where raw FASTQs live, can be absolute path or path relative to Snakefile
 fastqs: raw_data
@@ -32,7 +32,7 @@ create_assets:
 #         Note, when processing data generated with the Adaptase module, it is highly suggested to set args_list: '--clip_R2 15'
 trim_galore:
     trim_before_BISCUIT: False
-    args_list: '--clip_R2 14'
+    args_list: '--clip_R2 15'
 
 # BISCUIT alignment options
 #     biscuit_blaster_version: version of biscuitBlaster to run (specify either v1 or v2)
@@ -56,10 +56,10 @@ sam_header:
     LB: b1
 
 # Call SNPs with BISCUIT (True) or not (False)?
-generate_snps: True
+generate_snps: False
 
 # Create epiBED files (True) or not (False)? Sets generate_snps to True if epiread is True
-epiread: True
+epiread: False
 
 # Create a joint reference with ref['fasta'], lambda phage, and pUC19 genomes (lambda phage and pUC19 genomes proved in bin/)
 # Lambda phage and pUC19 control vectors are only included in Illumina's NEBNext® Enzymatic Methyl-seq Kit
@@ -150,6 +150,8 @@ envmodules:
 #     pileupThreads: number of threads to run biscuit pileup with
 hpcParameters:
     maxThreads: 28
+    biscuitBlasterThreads: 20
+    samtoolsIndexThreads: 8
     maxMemoryGb: 245
     intermediateMemoryGb: 80
     smallMemoryGb: 20
@@ -165,7 +167,7 @@ walltime:
 
 # Create binned average methylation values using bin/find_binned_averages.sh
 binned_averages:
-   run: True
+   run: False
    covFilter: 1
    bin_sizes: [10000, 100000, 1000000] # one bin_sizes will also work, but needs to be a python list!
    #~ bin_sizes: [1000000] # one bin_sizes will also work, but needs to be a python list!
