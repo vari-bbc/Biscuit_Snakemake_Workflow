@@ -100,6 +100,16 @@ rule all:
         ) if config['cpg_stats']['run'] else [],
         f'{output_directory}/analysis/cpg_stats/cgi_stats.pdf' if config['cpg_stats']['run'] else [],
 
+        # Coverage uniformity
+        expand(
+            f'{output_directory}/analysis/covg_uniformity/{{samples.sample}}.10kb_binned_coverage.bed.gz',
+            samples=SAMPLES.itertuples()
+        ) if config['covg_uniformity']['run'] else [],
+        f'{output_directory}/analysis/covg_uniformity/binned_genome_coverage.pdf' if config['covg_uniformity']['run'] else [],
+        f'{output_directory}/analysis/covg_uniformity/coverage_uniformity.pdf' if config['covg_uniformity']['run'] else [],
+        f'{output_directory}/analysis/covg_uniformity/sample_data.tsv' if config['covg_uniformity']['run'] else [],
+
+        # Control vectors
         expand(
             f'{output_directory}/analysis/qc_vectors/lambda/{{samples.sample}}.bed',
             samples=SAMPLES.itertuples()
@@ -133,6 +143,8 @@ include:
     'rules/obs_exp.smk'
 include:
     'rules/cpg_stats.smk'
+include:
+    'rules/covg_uniformity.smk'
 
 # Rules for creating assets
 include:
