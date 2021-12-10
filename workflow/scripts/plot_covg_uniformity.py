@@ -65,10 +65,10 @@ def create_plot(files, params, outfile):
         samp = os.path.basename(s).replace('.10kb_binned_coverage.bed.gz', '')
 
         # Read data
-        df = pd.read_csv(s, sep='\t', header=None, names=['chr', 'start', 'end', 'covg'])
+        in_df = pd.read_csv(s, sep='\t', header=None, names=['chr', 'start', 'end', 'covg'], na_values='.')
 
         # Merge average bismap mappability scores as a weight column
-        df = df.merge(weights, on=['chr', 'start', 'end'])
+        df = in_df.merge(weights, on=['chr', 'start', 'end'], how='outer')
 
         # Sort chromosomes to put chrM at the end
         df['chr'] = df['chr'].astype(chr_sort_order)
@@ -123,7 +123,7 @@ def create_plot(files, params, outfile):
     ax.axhline(line_loc, alpha=0.6, color='grey', linestyle='--')
     ax.text(x = 0.01, y = line_loc-0.01, s = 'Ideal Std. Dev.', ha='left', va='top', fontsize=14)
 
-    ax.set_xlim(0, 1.1*max(plot_data['frac'])); ax.set_ylim(0, 1.1*max(plot_data['lstd']))
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1.1*max(plot_data['lstd']))
 
     plt.title('Whole Genome Coverage Uniformity', fontsize=24)
     plt.xlabel('(# Bins with Weighted Coverage > 0.01) /\n(# Bins with Nonzero Weights)', fontsize=18, va='top')
