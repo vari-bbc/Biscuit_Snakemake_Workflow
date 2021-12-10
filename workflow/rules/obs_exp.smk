@@ -11,7 +11,7 @@ rule obs_exp_coverage_genomecov:
     input:
         bam = f'{output_directory}/analysis/align/{{sample}}.sorted.markdup.bam',
     output:
-        cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
+        cov = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz'),
     params:
         outdir = f'{output_directory}/analysis/obs_exp',
     log:
@@ -42,7 +42,7 @@ rule obs_exp_coverage_genomecov_cpg:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        cpg = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.cpg.tmp.bed.gz',
+        cpg = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.cpg.tmp.bed.gz'),
     params:
         cpg = f'{config["obs_exp"]["assets"]}/cpg_bismap.bed.gz',
     log:
@@ -69,7 +69,7 @@ rule obs_exp_coverage_genomecov_cgi:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        cgi = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.cgi.tmp.bed.gz',
+        cgi = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.cgi.tmp.bed.gz'),
     params:
         cgi = f'{config["obs_exp"]["assets"]}/cgi_bismap.bed.gz',
     log:
@@ -96,7 +96,7 @@ rule obs_exp_coverage_genomecov_intergenic:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        intergenic = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.intergenic.tmp.bed.gz',
+        intergenic = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.intergenic.tmp.bed.gz'),
     params:
         intergenic = f'{config["obs_exp"]["assets"]}/intergenic_bismap.bed.gz',
     log:
@@ -123,7 +123,7 @@ rule obs_exp_coverage_genomecov_exon:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        exon = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.exon.tmp.bed.gz',
+        exon = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.exon.tmp.bed.gz'),
     params:
         exon = f'{config["obs_exp"]["assets"]}/exon_bismap.bed.gz',
     log:
@@ -150,7 +150,7 @@ rule obs_exp_coverage_genomecov_genic:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        genic = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.genic.tmp.bed.gz',
+        genic = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.genic.tmp.bed.gz'),
     params:
         genic = f'{config["obs_exp"]["assets"]}/genic_bismap.bed.gz',
     log:
@@ -177,7 +177,7 @@ rule obs_exp_coverage_genomecov_rmsk:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        rmsk = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.rmsk.tmp.bed.gz',
+        rmsk = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.rmsk.tmp.bed.gz'),
     params:
         rmsk = f'{config["obs_exp"]["assets"]}/rmsk_bismap.bed.gz',
     log:
@@ -204,7 +204,7 @@ rule obs_exp_coverage_genomecov_mapped:
     input:
         cov = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.tmp.bed.gz',
     output:
-        mapped = f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.mapped.tmp.bed.gz',
+        mapped = temp(f'{output_directory}/analysis/obs_exp/{{sample}}.genomecov.mapped.tmp.bed.gz'),
     params:
         mapped = f'{config["obs_exp"]["assets"]}/k100.bismap.bedgraph.gz',
     log:
