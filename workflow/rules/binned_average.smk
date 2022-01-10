@@ -3,7 +3,8 @@
 #
 # output_directory - workflow/Snakefile
 # config           - workflow/Snakefile
-# SAMPLES          - workflow/Snakefile
+# create_tag       - workflow/Snakefile
+# bin_tags         - workflow/Snakefile
 #
 ###-----------------------------------------------------------------------------------------------------------------###
 
@@ -12,9 +13,6 @@ def get_biscuit_reference(wildcards):
         return 'merged_reference/merged.fa.gz'
     else:
         return config['ref']['fasta']
-
-bin_tags = list(map(create_tag, config["binned_averages"]["bin_sizes"]))
-
 
 rule binned_averages:
     input:

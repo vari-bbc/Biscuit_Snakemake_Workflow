@@ -10,8 +10,8 @@ rule cpg_stats_genomecov:
     input:
         bam = f'{output_directory}/analysis/align/{{sample}}.sorted.markdup.bam',
     output:
-        unf = f'{output_directory}/analysis/cpg_stats/{{sample}}.genomecov.cpg.q00.bed.gz',
-        fil = f'{output_directory}/analysis/cpg_stats/{{sample}}.genomecov.cpg.q40.bed.gz',
+        unf = temp(f'{output_directory}/analysis/cpg_stats/{{sample}}.genomecov.cpg.q00.bed.gz'),
+        fil = temp(f'{output_directory}/analysis/cpg_stats/{{sample}}.genomecov.cpg.q40.bed.gz'),
     params:
         outdir = f'{output_directory}/analysis/cpg_stats',
         cpg = f'{config["cpg_stats"]["assets"]}/cpg.bed.gz',

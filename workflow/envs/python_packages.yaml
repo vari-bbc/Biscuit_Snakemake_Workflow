@@ -9,3 +9,4 @@ dependencies:
     - numpy=1.21.3
     - matplotlib-base=3.4.3
     - multiqc=1.11
+    - seaborn=0.11.2

@@ -98,6 +98,8 @@ rule biscuit_blaster:
         split = f'{output_directory}/analysis/align/{{sample}}.split.sam',
         unmapped = f'{output_directory}/analysis/align/{{sample}}.unmapped.fastq',
         biscuit_version = config['biscuit']['biscuit_blaster_version'],
+        bb_threads = config['hpcParameters']['biscuitBlasterThreads'],
+        st_threads = config['hpcParameters']['samtoolsIndexThreads'],
     log:
         biscuit = f'{output_directory}/logs/biscuit/biscuit_blaster.{{sample}}.log',
         biscuit_blaster_version = f'{output_directory}/logs/biscuit/blaster_version.{{sample}}.log',
@@ -113,7 +115,7 @@ rule biscuit_blaster:
         bgzip_unmapped = f'{output_directory}/logs/biscuit/bgzip_unmapped.{{sample}}.log',       
     benchmark:
         f'{output_directory}/benchmarks/biscuit_blaster/{{sample}}.txt'
-    threads: config['hpcParameters']['maxThreads']
+    threads: config['hpcParameters']['biscuitBlasterThreads'] + config['hpcParameters']['samtoolsIndexThreads']
     resources:
         mem_gb = config['hpcParameters']['maxMemoryGb'],
         walltime = config['walltime']['long'],
@@ -130,28 +132,26 @@ rule biscuit_blaster:
             echo "biscuit blaster v2" 2> {log.biscuit_blaster_version}
 
             # biscuitBlaster pipeline
-            # The out.bam##idx##out.bam.bai is the required format for using --write-index in samtools sort if you want
-            # to get a bai index, rather than a csi index
-            # NOTE: THIS ONLY WORKS WITH SAMTOOLS 1.12+
-            biscuit align -@ {threads} -b {params.lib_type} \
+            biscuit align -@ {params.bb_threads} -b {params.lib_type} \
                 -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
                 {input.reference} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
             samblaster --addMateTags -d {params.disc} -s {params.split} -u {params.unmapped} 2> {log.samblaster} | \
-            samtools sort --write-index -@ {threads} -m 5G -o {output.bam}##idx##{output.bai} -O BAM - 2> {log.samtools_sort}
+            samtools sort -@ {params.st_threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {params.st_threads} {output.bam} 2> {log.samtools_index}
 
             # Get some initial stats
             samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
 
             # Sort, compress, and index discordant read file
-            samtools sort --write-index -@ {threads} -o {output.disc}##idx##{output.disc_bai} -O BAM {params.disc} 2> {log.sort_disc}
-            #samtools index -@ {threads} {output.disc} 2> {log.index_disc}
+            samtools sort -@ {params.st_threads} -o {output.disc} -O BAM {params.disc} 2> {log.sort_disc}
+            samtools index -@ {params.st_threads} {output.disc} 2> {log.index_disc}
 
             # Sort, compress, and index split read file
-            samtools sort --write-index -@ {threads} -o {output.split}##idx##{output.split_bai} -O BAM {params.split} 2> {log.sort_split}
-            #samtools index -@ {threads} {output.split} 2> {log.index_split}
+            samtools sort -@ {params.st_threads} -o {output.split} -O BAM {params.split} 2> {log.sort_split}
+            samtools index -@ {params.st_threads} {output.split} 2> {log.index_split}
 
             # Compress unmapped/clipped FASTQ
-            bgzip -@ {threads} {params.unmapped} 2> {log.bgzip_unmapped}
+            bgzip -@ {params.st_threads} {params.unmapped} 2> {log.bgzip_unmapped}
 
             # Clean up
             rm {params.disc}
@@ -160,14 +160,12 @@ rule biscuit_blaster:
             echo "biscuit blaster v1" 2> {log.biscuit_blaster_version}
 
             # biscuitBlaster pipeline
-            # The out.bam##idx##out.bam.bai is the required format for using --write-index in samtools sort if you want
-            # to get a bai index, rather than a csi index
-            # NOTE: THIS ONLY WORKS WITH SAMTOOLS 1.12+
-            biscuit align -@ {threads} -b {params.lib_type} \
+            biscuit align -@ {params.bb_threads} -b {params.lib_type} \
                 -R '@RG\tLB:{params.LB}\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tSM:{params.SM}' \
                 {input.reference} <(zcat {input.R1}) <(zcat {input.R2}) 2> {log.biscuit} | \
             samblaster --addMateTags 2> {log.samblaster} | \
-            samtools sort --write-index -@ {threads} -m 5G -o {output.bam}##idx##{output.bai} -O BAM - 2> {log.samtools_sort}
+            samtools sort -@ {params.st_threads} -m 5G -o {output.bam} -O BAM - 2> {log.samtools_sort}
+            samtools index -@ {params.st_threads} {output.bam} 2> {log.samtools_index}
 
             # Get some initial stats
             samtools flagstat {output.bam} 1> {output.flagstat} 2> {log.samtools_flagstat}
@@ -317,7 +315,7 @@ rule biscuit_epiread:
         f'{output_directory}/logs/epiread/epiread.{{sample}}.log',
     benchmark:
         f'{output_directory}/benchmarks/biscuit_epiread/{{sample}}.txt'
-    threads: 1
+    threads: config['hpcParameters']['pileupThreads']
     resources:
         mem_gb = config['hpcParameters']['intermediateMemoryGb'],
         walltime = config['walltime']['medium'],
@@ -330,9 +328,9 @@ rule biscuit_epiread:
         """
         if [[ "$(zcat {input.snps} | head -n 1 | wc -l)" == "1" ]]; then
             if [ {params.nome} == "True" ]; then
-                biscuit epiread -N -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
+                biscuit epiread -N -@ {threads} -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
             else
-                biscuit epiread -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
+                biscuit epiread -@ {threads} -B <(zcat {input.snps}) {input.ref} {input.bam} | sort -k1,1 -k2,2n > {params.epibed} 2> {log}
             fi
         else
             if [ {params.nome} == "True" ]; then
