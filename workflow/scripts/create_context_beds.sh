@@ -146,18 +146,18 @@ create_files() {
     parallel -j ${thread} 'find_context {} > {.}.context' ::: cpgcontext_*.tab
 
     # Extract CpGs into specific context and number of neighboring CpG files
-    grep --no-filename WCGW_0 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_0_neighbors.bed.gz
-    grep --no-filename WCGW_1 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_1_neighbors.bed.gz
-    grep --no-filename WCGW_2 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_2_neighbors.bed.gz
-    grep --no-filename WCGW_3 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_3p_neighbors.bed.gz
-    grep --no-filename SCGW_0 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_0_neighbors.bed.gz
-    grep --no-filename SCGW_1 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_1_neighbors.bed.gz
-    grep --no-filename SCGW_2 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_2_neighbors.bed.gz
-    grep --no-filename SCGW_3 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_3p_neighbors.bed.gz
-    grep --no-filename SCGS_0 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_0_neighbors.bed.gz
-    grep --no-filename SCGS_1 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_1_neighbors.bed.gz
-    grep --no-filename SCGS_2 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_2_neighbors.bed.gz
-    grep --no-filename SCGS_3 *.context | cut -f1-3,5-7 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_3p_neighbors.bed.gz
+    grep --no-filename WCGW_0 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_0_neighbors.bed.gz
+    grep --no-filename WCGW_1 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_1_neighbors.bed.gz
+    grep --no-filename WCGW_2 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_2_neighbors.bed.gz
+    grep --no-filename WCGW_3 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > wcgw_3p_neighbors.bed.gz
+    grep --no-filename SCGW_0 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_0_neighbors.bed.gz
+    grep --no-filename SCGW_1 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_1_neighbors.bed.gz
+    grep --no-filename SCGW_2 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_2_neighbors.bed.gz
+    grep --no-filename SCGW_3 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgw_3p_neighbors.bed.gz
+    grep --no-filename SCGS_0 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_0_neighbors.bed.gz
+    grep --no-filename SCGS_1 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_1_neighbors.bed.gz
+    grep --no-filename SCGS_2 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_2_neighbors.bed.gz
+    grep --no-filename SCGS_3 *.context | cut -f1-9 | sort -k1,1 -k2,2n -k3,3n | gzip > scgs_3p_neighbors.bed.gz
 
     rm cpgsplit_* cpgcontext_*
 }
