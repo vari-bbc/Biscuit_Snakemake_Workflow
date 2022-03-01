@@ -45,10 +45,6 @@ snakemake --dag | dot -Tpng > ${CONF_output_directory}/logs/runs/workflow_${TIME
 
 # Default to using conda, if using environment modules, then replace --use-conda with --use-envmodules
 # Note, this requires downloading mamba (conda install -n base -c conda-forge mamba)
-
-#~ echo "Here it is:"
-#~ echo ${CONF_output_directory}
-
 snakemake \
     --use-envmodules \
     --jobs 20 \
