@@ -3,9 +3,9 @@
 #     index: does not need to be different from "fasta", but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
 #     assets: prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 ref:
-    fasta: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
-    index: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
-    assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets
+    fasta: /path/to/your/fasta/file/genome.fa
+    index: /path/to/your/biscuit/index/base/that/could/be/the/same/as/fasta/genome.fa
+    assets: /path/to/your/biscuit_qc/assets
 
 # Directory where raw FASTQs live, can be absolute path or path relative to Snakefile
 fastqs: raw_data
@@ -185,7 +185,6 @@ binned_averages:
 #     run: run rules involved with this
 #     args_list: additonal arguments to pass to scripts/region_centered_bin_averages.py
 region_centered_bin_averages:
-    run: True
-    #~ region_file: /path/to/a/region/file/for/which/you/want/centered/bins.bed
-    region_file: /varidata/research/projects/laird/projects/2018_06_20_Stanford_ATACseq/CTCF/xie_predicted_CTCF_binding_sites.orientedOnly.exclude4kbKGpromoters.hg38.sorted.bed
+    run: False
+    region_file: /path/to/a/region/file/for/which/you/want/centered/bins.bed
     args_list: '-f 5 -m 200 -n 1 -s 4 --middle --collapse'
