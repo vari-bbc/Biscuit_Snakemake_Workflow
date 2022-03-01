@@ -3,9 +3,9 @@
 #     index: does not need to be different from "fasta", but might be useful if 2-bit packed reference doesn't have .fa extension or is named differently
 #     assets: prebuilt assets and scripts to build custom assets can be found at https://github.com/huishenlab/biscuit/releases/
 ref:
-    fasta: /path/to/your/fasta/file/genome.fa
-    index: /path/to/your/biscuit/index/base/that/could/be/the/same/as/fasta/genome.fa
-    assets: /path/to/your/biscuit_qc/assets
+    fasta: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
+    index: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/EMseq_GRCh38.primary_assembly.genome.fa.gz
+    assets: /varidata/researchtemp/hpctmp/biscuit_reference_hg38/hg38_biscuit_assets
 
 # Directory where raw FASTQs live, can be absolute path or path relative to Snakefile
 fastqs: raw_data
@@ -131,6 +131,7 @@ envmodules:
     pigz: bbc/pigz/pigz-2.4
     fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
     bismark: bbc/bismark/bismark-0.23.0
+    python3: bbc/python3/python-3.8.1
     # if you e.g. don't have a module system then put the envmodules as follows:
     #~ samtools: "NULL"
     #~ R: "NULL"
@@ -180,3 +181,11 @@ binned_averages:
    #~ bin_sizes: [1000000] # one bin_sizes will also work, but needs to be a python list!
    
    
+# Turn on/off region_centered_bin_averages
+#     run: run rules involved with this
+#     args_list: additonal arguments to pass to scripts/region_centered_bin_averages.py
+region_centered_bin_averages:
+    run: True
+    #~ region_file: /path/to/a/region/file/for/which/you/want/centered/bins.bed
+    region_file: /varidata/research/projects/laird/projects/2018_06_20_Stanford_ATACseq/CTCF/xie_predicted_CTCF_binding_sites.orientedOnly.exclude4kbKGpromoters.hg38.sorted.bed
+    args_list: '-f 5 -m 200 -n 1 -s 4 --middle --collapse'
