@@ -54,9 +54,14 @@ rule all:
             read=[1,2], samples=SAMPLES.itertuples()
         ) if config['run_fastq_screen'] else [],
 
+        # Create asset files
         expand(
             f'assets/{config["create_assets"]["genome"]}/{{type}}_bismap.bed.gz',
             type=['cpg', 'cgi', 'exon', 'genic', 'intergenic', 'rmsk']
+        ) if config['create_assets']['run'] else [],
+        expand(f'assets/{config["create_assets"]["genome"]}/{{ctxt}}_{{ncpgs}}_neighbors.bed.gz',
+            ctxt=['scgs', 'scgw', 'wcgw'],
+            ncpgs=['0', '1', '2', '3p']
         ) if config['create_assets']['run'] else [],
 
         ## Run BISCUIT
