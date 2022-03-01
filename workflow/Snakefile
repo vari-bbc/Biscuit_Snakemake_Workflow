@@ -126,6 +126,12 @@ rule all:
             samples=SAMPLES.itertuples(), BIN_TAGS = bin_tags,
         ) if config['binned_averages']['run'] else [],
         
+        # region_centered_bin_averages
+        expand(
+            f'{output_directory}/analysis/region_centered_bin_averages/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples(),
+        ) if config['region_centered_bin_averages']['run'] else [],
+        
 # Rules for preprocessing files
 include:
     'rules/preprocessing.smk'
@@ -153,3 +159,7 @@ include:
 # Rules for creating binned averages
 include:
     'rules/binned_average.smk'
+
+# Rules for creating region-centered bin averages
+include:
+    'rules/region_centered_bin_averages.smk'
