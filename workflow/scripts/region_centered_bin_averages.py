@@ -1,27 +1,18 @@
 #!/usr/bin/env python
+#----------------------------------------------------------------------------------------------------------------------
+#
+# Create bins around input features
+#
+# Created by:
+#     Wanding Zhou (with documentation by Jacob Morrison)
+#
+# Notes:
+#     Jan 2022
+#         - Initial creation from https://github.com/zwdzwd/wzmetagene
+#
+#----------------------------------------------------------------------------------------------------------------------
 import argparse
 import numpy as np
-
-"""
-Generate intervals for meta-gene plot.
-Usage:
-python ~/wzlib/pyutils/wzmetagene.py input_bed | less
-"""
-
-"""
-Command ran by Ben for CTCF plotting:
-
-python3 ~/git_repos/wzmetagene/wzmetagene.py \
-    -f 5 \
-    -m 200 \
-    -n 1 \
-    -s 4 \
-    --outer \
-    --expansion 30 \
-    xie_predicted_CTCF_binding_sites.orientedOnly.exclude4kbKGpromoters.hg38.sorted.bed | \
-sortBed | \
-gzip -c > xie_predicted_CTCF_binding_sites.orientedOnly.exclude4kbKGpromoters.hg38.sorted.ctcfmetagenes.bed.gz
-"""
 
 # A terminology note:
 #
