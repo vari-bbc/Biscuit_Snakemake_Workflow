@@ -1,9 +1,9 @@
 ###-----------------------------------------------------------------------------------------------------------------###
 # Notes on where variables are defined, if not defined in obs_exp.smk
 #
-# output_directory        - workflow/Snakefile
-# config                  - workflow/Snakefile
-# get_biscuit_refererence - workflow/rules/biscuit.smk
+# output_directory      - workflow/Snakefile
+# config                - workflow/Snakefile
+# get_biscuit_reference - workflow/rules/biscuit.smk
 #
 ###-----------------------------------------------------------------------------------------------------------------###
 
@@ -170,7 +170,6 @@ rule general_assets:
         rm -f {params.tmp_gen} {params.tmp_exn}
         """       
 
-
 rule bismap_assets:
     input:
         cpg = f'assets/{config["create_assets"]["genome"]}/cpg.bed.gz',
@@ -226,4 +225,38 @@ rule bismap_assets:
         bedtools intersect -a {output.bis} -b {input.gen} | gzip -c 1> {output.gen} 2> {log}
         bedtools intersect -a {output.bis} -b {input.inr} | gzip -c 1> {output.inr} 2> {log}
         bedtools intersect -a {output.bis} -b {input.msk} | gzip -c 1> {output.msk} 2> {log}
+        """
+
+rule wcgw_assets:
+    input:
+        cpg = f'assets/{config["create_assets"]["genome"]}/cpg.bed.gz',
+        ref = get_biscuit_reference,
+    output:
+        expand(f'assets/{config["create_assets"]["genome"]}/{{ctxt}}_{{ncpgs}}_neighbors.bed.gz',
+            ctxt=['scgs', 'scgw', 'wcgw'],
+            ncpgs=['0', '1', '2', '3p']
+        ),
+    params:
+        dir = f'assets/{config["create_assets"]["genome"]}',
+        cpg = os.getcwd(),
+    log:
+        f'{output_directory}/logs/wcgw_assets.log',
+    benchmark:
+        f'{output_directory}/benchmarks/wcgw_assets.txt',
+    threads: config['hpcParameters']['maxThreads']
+    resources:
+        mem_gb = config['hpcParameters']['smallMemoryGb'],
+        walltime = config['walltime']['short'],
+    conda:
+        '../envs/biscuit.yaml'
+    envmodules:
+        config['envmodules']['bedtools'],
+        config['envmodules']['parallel'],
+    shell:
+        """
+        bash workflow/scripts/create_context_beds.sh \
+            -t {threads} \
+            -o {params.dir} \
+            {input.ref} \
+            {params.cpg}/{input.cpg} 2> {log}
         """

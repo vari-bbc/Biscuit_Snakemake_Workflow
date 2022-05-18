@@ -131,6 +131,7 @@ envmodules:
     pigz: bbc/pigz/pigz-2.4
     fastq_screen: bbc/fastq_screen/fastq_screen-0.14.0
     bismark: bbc/bismark/bismark-0.23.0
+    python3: bbc/python3/python-3.8.1
     # if you e.g. don't have a module system then put the envmodules as follows:
     #~ samtools: "NULL"
     #~ R: "NULL"
@@ -147,6 +148,7 @@ envmodules:
     #~ pigz: "NULL"
     #~ fastq_screen: "NULL"
     #~ bismark: "NULL"
+    #~ python3: "NULL"
 
 # Memory and Thread parameters used when running on a cluster
 #     maxThreads: number of threads to run biscuit align with
@@ -179,4 +181,11 @@ binned_averages:
    bin_sizes: [10000, 100000, 1000000] # one bin_sizes will also work, but needs to be a python list!
    #~ bin_sizes: [1000000] # one bin_sizes will also work, but needs to be a python list!
    
-   
+# Turn on/off region_centered_bin_averages
+#     run: run rules involved with this
+#     region_file: BED file with regions to build bins around
+#     args_list: additonal arguments to pass to scripts/region_centered_bin_averages.py
+region_centered_bin_averages:
+    run: False
+    region_file: /path/to/a/region/file/for/which/you/want/centered/bins.bed
+    args_list: '-f 5 -m 200 -n 1 -s 4 --middle --collapse'

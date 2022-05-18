@@ -54,9 +54,14 @@ rule all:
             read=[1,2], samples=SAMPLES.itertuples()
         ) if config['run_fastq_screen'] else [],
 
+        # Create asset files
         expand(
             f'assets/{config["create_assets"]["genome"]}/{{type}}_bismap.bed.gz',
             type=['cpg', 'cgi', 'exon', 'genic', 'intergenic', 'rmsk']
+        ) if config['create_assets']['run'] else [],
+        expand(f'assets/{config["create_assets"]["genome"]}/{{ctxt}}_{{ncpgs}}_neighbors.bed.gz',
+            ctxt=['scgs', 'scgw', 'wcgw'],
+            ncpgs=['0', '1', '2', '3p']
         ) if config['create_assets']['run'] else [],
 
         ## Run BISCUIT
@@ -126,6 +131,12 @@ rule all:
             samples=SAMPLES.itertuples(), BIN_TAGS = bin_tags,
         ) if config['binned_averages']['run'] else [],
         
+        # region_centered_bin_averages
+        expand(
+            f'{output_directory}/analysis/region_centered_bin_averages/{{samples.sample}}.bed',
+            samples=SAMPLES.itertuples(),
+        ) if config['region_centered_bin_averages']['run'] else [],
+        
 # Rules for preprocessing files
 include:
     'rules/preprocessing.smk'
@@ -153,3 +164,7 @@ include:
 # Rules for creating binned averages
 include:
     'rules/binned_average.smk'
+
+# Rules for creating region-centered bin averages
+include:
+    'rules/region_centered_bin_averages.smk'
