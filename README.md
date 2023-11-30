@@ -1,3 +1,10 @@
+---
+📌 **Deprecation Notice**
+
+This repository is deprecated and will no longer be maintained by the Van Andel Institute Bioinformatics and Biostatistics Core. An updated fork with ongoing development and maintenance can be found [here](https://github.com/huishenlab/Biscuit_Snakemake_Workflow).
+
+---
+  
 This Snakemake workflow takes paired-end whole-genome bisulfite sequencing (WGBS) data and processes it using
 BISulfite-seq CUI Toolkit (BISCUIT).
 
